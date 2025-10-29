@@ -58,7 +58,6 @@ class SpikyNonconvexCoordinateDescent:
        
         
         # Calculate derived parameters
-        # For cubic queries over n points, we will use n points directly and rho = (upper - lower) / n
         self.num_points = n
         self.m = self.num_points * math.ceil(math.log2(((upper_bound - lower_bound)/10**(-data_precision)) + 1))
         self.rho = (self.upper_bound**2+1) / self.n
