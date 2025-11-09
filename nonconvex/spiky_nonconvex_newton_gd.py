@@ -1559,7 +1559,7 @@ class SpikyNonconvexCoordinateDescent:
                  beta: float,
                  eta: float,
                  n: int,
-                 tau: float = 0.01,
+                 tau: float = 0.001,
                  upper_bound: float = math.pi,
                  lower_bound: float = -math.pi,
                  frequency: float = 5.0,
@@ -1670,8 +1670,8 @@ class SpikyNonconvexCoordinateDescent:
         if self.cap_step is None:
             self.cap_step = 0.4 * self.lambda_val  # heuristic; ~raw Newton magnitude
 
-        print(f"Calculated lambda: {self.lambda_val:.6f}")
-        print(f"Set {k} spiky nonconvex queries with different amplitude vectors and frequencies")
+        # print(f"Calculated lambda: {self.lambda_val:.6f}")
+        # print(f"Set {k} spiky nonconvex queries with different amplitude vectors and frequencies")
 
     def generate_data(self,
                       real_data: Optional[np.ndarray] = None,
@@ -1931,7 +1931,10 @@ class SpikyNonconvexCoordinateDescent:
         if self.amplitudes_matrix is None or self.frequencies_vector is None or self.query_weights is None:
             raise ValueError("Must set amplitude matrix, frequency vector, and weights first")
 
-        self.compute_query_outputs()
+        need_init = (self.fake_output is None) or (self.real_data_noisy_output is None)
+        if resample_noise or need_init:
+            self.compute_query_outputs()   # only if requested or not initialized
+
         target_ratio = 0.5 + self.eta
 
         num_iterations = 0
@@ -1950,8 +1953,11 @@ class SpikyNonconvexCoordinateDescent:
             print(f"Queries above lambda/2: {np.sum(self.error > self.lambda_val/2)}")
             print("NOTE: Stopping when satisfaction ratio >= 0.5 + eta (nonconvex setting).")
 
+        # while (num_iterations < max_iterations and
+        #        self.compute_weighted_satisfaction_ratio() < target_ratio):
         while (num_iterations < max_iterations and
-               self.compute_weighted_satisfaction_ratio() < target_ratio):
+               total_loss_update > self.tau and self.compute_weighted_satisfaction_ratio() < target_ratio):
+        
             total_loss, total_loss_update = self.coordinate_descent_step()
             num_iterations += 1
 

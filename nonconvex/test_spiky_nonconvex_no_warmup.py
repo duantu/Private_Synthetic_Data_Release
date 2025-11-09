@@ -350,65 +350,207 @@ Hard-but-tractable regime so optimization actually runs:
   amplitudes in [0.4, 0.9], frequencies in [4.5, 7.5]
 Prints loss before/after and satisfaction progress summary.
 """
+#!/usr/bin/env python3
+"""
+Minimal test driver for spiky nonconvex optimization (no warm-up).
+Prints: parameters, threshold (0.5+eta), initial satisfaction, loss before/after, iterations to target.
+"""
+# #!/usr/bin/env python3
+# """
+# Minimal test driver for spiky nonconvex optimization.
+# Prints only: parameters, threshold (0.5+eta), initial satisfaction,
+# and iterations to target.
+# """
+
+# import numpy as np
+# import math
+# import secrets
+# from spiky_nonconvex_copy import SpikyNonconvexCoordinateDescent
+
+# def test_spiky_nonconvex_queries(
+#     n=400, epsilon=5.0, delta=1e-5, beta=0.05, eta=0.01,
+#     k=30, max_iterations=1000, seed=None
+# ):
+#     # Pick a seed if none
+#     if seed is None:
+#         seed = secrets.randbits(32)
+
+#     # Seed NumPy (your class uses np.random.* inside generate_data)
+#     np.random.seed(seed)
+
+#     # Create optimizer (no unsupported kwargs)
+#     opt = SpikyNonconvexCoordinateDescent(
+#         epsilon=epsilon,
+#         delta=delta,
+#         beta=beta,
+#         eta=eta,
+#         n=n,
+#         tau=0.01,
+#         upper_bound=math.pi,
+#         lower_bound=-math.pi
+#     )
+
+#     # Random queries (amplitudes & freqs) using this seed
+#     # CHANGED ranges to Option 2: amplitudes in [0.2, 1.0], frequencies in [4.0, 7.0]
+#     amplitudes_matrix = np.random.uniform(0.1, 1.0, size=(k, n))
+#     frequencies_vector = np.random.uniform(1, 10, size=k)
+#     weights = [1.0 / k] * k
+
+#     opt.set_queries_and_amplitudes(amplitudes_matrix, frequencies_vector, weights)
+
+#     # Keep fake_X constant across different seeds for fairness
+#     # opt.initialize_fake_X_random(-math.pi, math.pi)
+
+#     # Generate the synthetic real data with DP noise
+#     opt.generate_data()
+
+#     # Initial satisfaction (before optimization)
+#     initial_satisfaction = float(opt.compute_weighted_satisfaction_ratio())
+
+#     # Run optimization (quiet)
+#     res = opt.run_coordinate_descent(max_iterations=max_iterations, verbose=False)
+
+#     # Pull results (support either key name)
+#     iterations = res.get("iterations", res.get("num_iterations", 0))
+#     reached = res.get("target_reached", False)
+#     final_satisfaction = float(opt.compute_weighted_satisfaction_ratio())
+#     threshold = 0.5 + eta
+
+#     print(
+#         f"seed={seed} | n={n} k={k} eps={epsilon} delta={delta} beta={beta} eta={eta} "
+#         f"| target={threshold:.3f} | initial_satisfaction={initial_satisfaction:.3f} "
+#         f"| iters={iterations} | reached={reached} | final_satisfaction={final_satisfaction:.3f}"
+#     )
+
+#     return {
+#         "seed": seed,
+#         "n": n,
+#         "k": k,
+#         "epsilon": epsilon,
+#         "delta": delta,
+#         "beta": beta,
+#         "eta": eta,
+#         "target": threshold,
+#         "iterations": iterations,
+#         "reached": reached,
+#         "initial_satisfaction": initial_satisfaction,
+#         "final_satisfaction": final_satisfaction,
+#     }
+
+
+# if __name__ == "__main__":
+#     # Single run
+#     test_spiky_nonconvex_queries()
+
+#     # Multiple runs (distinct seeds 0..9 if seed not supplied in kwargs)
+#     for s in range(10):
+#         test_spiky_nonconvex_queries(k=36, seed=s)
+
+"""
+Minimal test driver for spiky nonconvex optimization.
+"""
+"""
+Minimal test driver for spiky nonconvex optimization (no pre-run).
+Relies on the runner to compute and report initial metrics.
+"""
+
+"""
+Minimal test driver for spiky nonconvex optimization (no pre-run).
+Relies on the runner to compute and report initial metrics.
+"""
 import numpy as np
 import math
 import secrets
-# from spiky_nonconvex_newton_gd import SpikyNonconvexCoordinateDescent
-from spiky_nonconvex_with_escape import SpikyNonconvexCoordinateDescent
+import argparse
+# from spiky_nonconvex_with_escape import SpikyNonconvexCoordinateDescent
+from spiky_nonconvex_newton_gd import SpikyNonconvexCoordinateDescent
 
-def _total_loss(fake_out, noisy_real_out, lam):
-    return float(
-        np.sum(np.exp((fake_out - noisy_real_out) / lam - 1.0)) +
-        np.sum(np.exp((noisy_real_out - fake_out) / lam - 1.0))
-    )
+# ---- SINGLE PLACE TO EDIT ----
+CONFIG = {
+    "num_runs": 10,
+    "n": 600,         # keep
+    "k": 40,          # keep
+    "epsilon": 1.5,   # ↓ from 3.0  → ↑ λ
+    "delta": 1e-6,    # ↓ from 1e-4 → ↑ λ (via log(1/δ))
+    "beta": 0.2,      # keep
+    "eta": 0.01,
+    "max_iterations": 5000,
+    "seed": None,
+    "tau": 1e-20,      # let more outer steps happen before stopping on tiny loss updates
+    "upper_bound": math.pi,
+    "lower_bound": -math.pi,
+    "freq_low": 4.5,
+    "freq_high": 7.5,
+    "amp_low": 0.1,
+    "amp_high": 1.0,
+}
 
-def test_spiky_nonconvex_queries(
-    n=320, k=36, epsilon=3.0, delta=1e-6, beta=0.1, eta=0.01, max_iterations=5000, seed=None
-):
-    if seed is None:
-        seed = secrets.randbits(32)
-    np.random.seed(seed)  # drives amplitudes/frequencies
 
-    opt = SpikyNonconvexCoordinateDescent(
+def build_optimizer(n, epsilon, delta, beta, eta, tau, upper_bound, lower_bound):
+    return SpikyNonconvexCoordinateDescent(
         epsilon=epsilon,
         delta=delta,
         beta=beta,
         eta=eta,
         n=n,
-        tau=0.01,
-        upper_bound=math.pi,
-        lower_bound=-math.pi,
-        m_inner=6,
-        shortlist_size=24,
-        seed=seed,                 # <-- ensure real_X/fake_X use same seed family
+        tau=tau,
+        upper_bound=upper_bound,
+        lower_bound=lower_bound,
     )
 
-    amplitudes_matrix = np.random.uniform(0.2, 0.7, size=(k, n))
-    frequencies_vector = np.random.uniform(4.5, 7.5, size=k)
-    weights = [1.0 / k] * k
 
+def test_spiky_nonconvex_queries(
+    n=120, k=36, epsilon=3.0, delta=1e-6, beta=0.1, eta=0.01, max_iterations=5000, seed=None,
+    tau=0.01, upper_bound=math.pi, lower_bound=-math.pi, freq_low=4.5, freq_high=7.5, amp_low=0.1, amp_high=1.0
+):
+    # Seed selection
+    if seed is None:
+        seed = secrets.randbits(32)
+    np.random.seed(seed)  # drives amplitudes/frequencies
+
+    # Build optimizer
+    opt = build_optimizer(n=n, epsilon=epsilon, delta=delta, beta=beta, eta=eta,
+                          tau=tau, upper_bound=upper_bound, lower_bound=lower_bound)
+
+    # Random queries (amplitudes & freqs)
+    amplitudes_matrix = np.random.uniform(amp_low, amp_high, size=(k, n))
+    frequencies_vector = np.random.uniform(freq_low, freq_high, size=k)
+    weights = [1.0 / k] * k
     opt.set_queries_and_amplitudes(amplitudes_matrix, frequencies_vector, weights)
 
-    noise_scale = opt.rho * math.sqrt(2 * k * math.log(1 / delta)) / epsilon
-    print(f"noise_scale={noise_scale:.6f}, lambda/2={opt.lambda_val/2:.6f}")
-
+    # Generate data
     opt.generate_data()
-    opt.compute_query_outputs()  # one DP-noise draw fixed for this run
 
-    initial_satisfaction = float(opt.compute_weighted_satisfaction_ratio())
-    loss_before = _total_loss(opt.fake_output, opt.real_data_noisy_output, opt.lambda_val)
+    # Compute outputs once so DP noise is fixed; also allows computing initial loss
+    opt.compute_query_outputs()
+
+    # Now it's safe to print lambda-related info
     target = 0.5 + eta
+    lam = float(opt.lambda_val)
+    noise_scale = opt.rho * math.sqrt(2 * k * math.log(1 / delta)) / epsilon
+    print(f"noise_scale={noise_scale:.6f}, lambda/2={lam/2:.6f}")
 
-    # Do NOT resample noise during optimization
+    # Initial loss BEFORE any optimization
+    loss_before = float((np.exp((opt.fake_output - opt.real_data_noisy_output) / lam - 1.0)
+                         + np.exp((opt.real_data_noisy_output - opt.fake_output) / lam - 1.0)).sum())
+
+    # Run optimizer WITHOUT resampling noise
     res = opt.run_coordinate_descent(max_iterations=max_iterations, verbose=False, resample_noise=False)
 
+    # Post-run metrics
     iterations = res.get("iterations", res.get("num_iterations", 0))
-    reached = res.get("target_reached", False)
+    reached = res.get("target_reached", False)  # informational if you changed stopping rule
     final_satisfaction = float(opt.compute_weighted_satisfaction_ratio())
-    loss_after = _total_loss(opt.fake_output, opt.real_data_noisy_output, opt.lambda_val)
-    loss_delta = loss_before - loss_after
+    initial_satisfaction = float(res.get("initial_weighted_satisfaction", float("nan")))
 
-    print(f"loss_before={loss_before:.6f} | loss_after={loss_after:.6f} | loss_drop={loss_delta:.6f}")
+    # Final loss
+    loss_after = float(res.get("final_loss",
+                               (np.exp((opt.fake_output - opt.real_data_noisy_output) / lam - 1.0)
+                                + np.exp((opt.real_data_noisy_output - opt.fake_output) / lam - 1.0)).sum()))
+    loss_drop = loss_before - loss_after
+
+    # Report
+    print(f"loss_before={loss_before:.6f} | loss_after={loss_after:.6f} | loss_drop={loss_drop:.6f}")
     print(
         f"seed={seed} | n={n} k={k} eps={epsilon} delta={delta} beta={beta} eta={eta} "
         f"| target={target:.3f} | initial_satisfaction={initial_satisfaction:.3f} "
@@ -428,24 +570,69 @@ def test_spiky_nonconvex_queries(
         "reached": reached,
         "initial_satisfaction": initial_satisfaction,
         "final_satisfaction": final_satisfaction,
-        "lambda": float(opt.lambda_val),
+        "lambda": lam,
         "noise_scale": float(noise_scale),
         "loss_before": float(loss_before),
         "loss_after": float(loss_after),
-        "loss_drop": float(loss_delta),
+        "loss_drop": float(loss_drop),
     }
 
-def test_multiple_runs(num_runs=3, **kwargs):
-    results = []
+
+def test_multiple_runs(num_runs=10, seed=None, **kwargs):
+    """
+    Run multiple seeds. If 'seed' is supplied, use it as a base offset.
+    All other parameters are forwarded to test_spiky_nonconvex_queries via **kwargs.
+    """
+    base = secrets.randbits(32) if seed is None else int(seed)
     for i in range(num_runs):
-        seed = kwargs.get("seed", None)
-        r = test_spiky_nonconvex_queries(seed=(i if seed is None else seed), **kwargs)
-        results.append(r)
-    return results
+        s = base + i if seed is None else (seed + i)
+        np.random.seed(s)
+        _ = test_spiky_nonconvex_queries(seed=s, **kwargs)
+        print("")
+
+
+def parse_args_from_cli():
+    p = argparse.ArgumentParser(description="Spiky Nonconvex tests")
+    # Keep CLI optional; defaults come from CONFIG
+    p.add_argument("--num_runs", type=int)
+    p.add_argument("--n", type=int)
+    p.add_argument("--k", type=int)
+    p.add_argument("--epsilon", type=float)
+    p.add_argument("--delta", type=float)
+    p.add_argument("--beta", type=float)
+    p.add_argument("--eta", type=float)
+    p.add_argument("--max_iterations", type=int)
+    p.add_argument("--seed", type=int)
+    p.add_argument("--tau", type=float)
+    p.add_argument("--upper_bound", type=float)
+    p.add_argument("--lower_bound", type=float)
+    p.add_argument("--freq_low", type=float)
+    p.add_argument("--freq_high", type=float)
+    p.add_argument("--amp_low", type=float)
+    p.add_argument("--amp_high", type=float)
+    return {k: v for k, v in vars(p.parse_args()).items() if v is not None}
+
 
 if __name__ == "__main__":
-    # Single run
-    test_spiky_nonconvex_queries()
+    # Merge CLI overrides onto CONFIG; edit CONFIG for single-spot changes
+    overrides = parse_args_from_cli()
+    cfg = {**CONFIG, **overrides}
 
-    # Multiple runs (distinct seeds 0..9 if seed not supplied in kwargs)
-    test_multiple_runs(num_runs=10, n=320, k=36, epsilon=3.0, delta=1e-6, beta=0.1, eta=0.01, max_iterations=5000)
+    test_multiple_runs(
+        num_runs=cfg["num_runs"],
+        seed=cfg["seed"],
+        n=cfg["n"],
+        k=cfg["k"],
+        epsilon=cfg["epsilon"],
+        delta=cfg["delta"],
+        beta=cfg["beta"],
+        eta=cfg["eta"],
+        max_iterations=cfg["max_iterations"],
+        tau=cfg["tau"],
+        upper_bound=cfg["upper_bound"],
+        lower_bound=cfg["lower_bound"],
+        freq_low=cfg["freq_low"],
+        freq_high=cfg["freq_high"],
+        amp_low=cfg["amp_low"],
+        amp_high=cfg["amp_high"],
+    )
