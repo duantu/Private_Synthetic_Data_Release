@@ -37,10 +37,11 @@ CONFIG = {
     "freq_high": 2,
     "amp_low": 0.1,
     "amp_high": 1.0,
+    "offset": 0.0,
 }
 
 
-def build_optimizer(n, epsilon_base, delta, beta, eta, tau, upper_bound, lower_bound):
+def build_optimizer(n, epsilon_base, delta, beta, eta, tau, upper_bound, lower_bound,offset):
     return SpikyNonconvexCoordinateDescent(
         epsilon=epsilon_base,
         delta=delta,
@@ -50,6 +51,7 @@ def build_optimizer(n, epsilon_base, delta, beta, eta, tau, upper_bound, lower_b
         tau=tau,
         upper_bound=upper_bound,
         lower_bound=lower_bound,
+        offset=offset,
     )
 
 
@@ -57,7 +59,7 @@ def test_spiky_nonconvex_queries(
     n=120, k=36, epsilon_base=3.0, delta=1e-6, beta=0.1, eta=0.01,
     max_iterations=5000, seed=None,
     tau=0.01, upper_bound=math.pi, lower_bound=-math.pi,
-    freq_low=4.5, freq_high=7.5, amp_low=0.1, amp_high=1.0
+    freq_low=4.5, freq_high=7.5, amp_low=0.1, amp_high=1.0, offset=0.0
 ):
     # Seed selection
     if seed is None:
@@ -74,6 +76,7 @@ def test_spiky_nonconvex_queries(
         tau=tau,
         upper_bound=upper_bound,
         lower_bound=lower_bound,
+        offset=offset,
     )
 
     # Random queries (amplitudes & freqs)
@@ -193,6 +196,7 @@ def parse_args_from_cli():
     p.add_argument("--freq_high", type=float)
     p.add_argument("--amp_low", type=float)
     p.add_argument("--amp_high", type=float)
+    p.add_argument("--offset", type=float)
     return {k: v for k, v in vars(p.parse_args()).items() if v is not None}
 
 
@@ -218,4 +222,5 @@ if __name__ == "__main__":
         freq_high=cfg["freq_high"],
         amp_low=cfg["amp_low"],
         amp_high=cfg["amp_high"],
+        offset=cfg["offset"],
     )

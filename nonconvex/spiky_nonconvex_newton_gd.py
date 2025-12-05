@@ -7,7 +7,7 @@ class SpikyNonconvexCoordinateDescent:
     Coordinate descent for spiky nonconvex queries.
 
     Query j:
-      f_j(X) = (1/n) * sum_i (x_i^2 + a_{j,i} * sin(w_j * x_i))
+      f_j(X) = (1/n) * sum_i (x_i^2 + a_{j,i} * sin(w_j * x_i)) + OFFSET
 
     Loss:
       L = sum_j [ exp((f_j(fake)-y_j)/λ - 1) + exp((y_j-f_j(fake))/λ - 1) ]
@@ -41,7 +41,8 @@ class SpikyNonconvexCoordinateDescent:
                  cap_step: Optional[float] = None,# if None → set adaptively from lambda
                  # expansion for bigger accepted steps
                  gamma_up: float = 1.6,           # step-size expansion factor
-                 max_expand: int = 4):            # max expansions if loss keeps dropping
+                 max_expand: int = 4,
+                 offset: float = 0.0):            # max expansions if loss keeps dropping
         # Core params
         self.epsilon = epsilon
         self.delta = delta
@@ -53,6 +54,7 @@ class SpikyNonconvexCoordinateDescent:
         self.lower_bound = lower_bound
         self.frequency = frequency
         self.data_precision = data_precision
+        self.offset = float(offset) 
 
         # RNG
         self.rng = np.random.default_rng(seed)
@@ -173,13 +175,13 @@ class SpikyNonconvexCoordinateDescent:
             freq = self.frequencies_vector[index]
 
             sum_real = np.sum(self.real_X**2 + amps * np.sin(freq * self.real_X))
-            self.real_output[index] = sum_real / self.n
+            self.real_output[index] = sum_real / self.n + self.offset
 
             self.lap_noise[index] = self.rng.laplace(loc=0.0, scale=noise_scale)
             self.real_data_noisy_output[index] = self.real_output[index] + self.lap_noise[index]
 
             sum_fake = np.sum(self.fake_X**2 + amps * np.sin(freq * self.fake_X))
-            self.fake_output[index] = sum_fake / self.n
+            self.fake_output[index] = sum_fake / self.n + self.offset
 
             self.error[index] = abs(self.fake_output[index] - self.real_data_noisy_output[index])
 
