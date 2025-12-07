@@ -45,7 +45,7 @@ class SpikyNonconvexCoordinateDescent:
                  offset: float = 0.0):            # max expansions if loss keeps dropping
         # Core params
         self.epsilon = epsilon
-        self.delta = delta
+        self.delta_base = delta
         self.beta = beta
         self.eta = eta
         self.n = n
@@ -129,7 +129,7 @@ class SpikyNonconvexCoordinateDescent:
 
         # lambda = ln(k/beta) * 2 * rho * sqrt(2k * ln(1/delta)) / epsilon
         self.lambda_val = (math.log(self.k / self.beta) * 2 * self.rho *
-                           math.sqrt(2 * self.k * math.log(1 / self.delta))) / self.epsilon
+                           math.sqrt(2 * self.k * math.log(1 / self.delta_base))) / self.epsilon
 
         # If cap not specified, set it relative to lambda (bigger moves)
         if self.cap_step is None:
@@ -168,7 +168,7 @@ class SpikyNonconvexCoordinateDescent:
         self.fake_output = np.zeros(k)
         self.error = np.zeros(k)
 
-        noise_scale = self.rho * math.sqrt(2 * k * math.log(1 / self.delta)) / self.epsilon
+        noise_scale = self.rho * math.sqrt(2 * k * math.log(1 / self.delta_base)) / self.epsilon
 
         for index in range(k):
             amps = self.amplitudes_matrix[index]

@@ -38,7 +38,6 @@ def compute_mu_from_theorem(
     T: int,                  # boosting horizon *used in theorem*
     *,
     C: float = 1.0,
-    exponent_gamma: int = 3,  # kept for backwards compatibility; not used now
 ) -> float:
     """
     Compute μ using the theorem:
@@ -67,7 +66,7 @@ def compute_mu_from_theorem(
     if T <= 0:
         raise ValueError("T must be positive.")
 
-    # ln((1+2η)/(1-2η)) (outside the sqrt, as in your corrected version)
+    # ln((1+2η)/(1-2η))
     log_eta = math.log((1.0 + 2.0 * gamma_margin) / (1.0 - 2.0 * gamma_margin))
 
     # sqrt(log(1/δ_sample)) and sqrt(log(1/δ_sample) + 2 ε_sample)
@@ -75,10 +74,72 @@ def compute_mu_from_theorem(
     inner = math.sqrt(log_one_over_delta) + math.sqrt(log_one_over_delta + 2.0 * epsilon_sample)
 
     # sqrt(2 k ln((1+2η)/(1-2η))) * T^{3/2} * ρ
-    prefactor = math.sqrt(2.0 * k * log_eta) * (T ** 1.5) * rho
+    prefactor = math.sqrt(2.0 * k) * log_eta * (T ** 1.5) * rho
 
     mu = C * prefactor * inner / float(epsilon_sample)
     return float(mu)
+
+def compute_T_cap(
+    rho: float,
+    k: int,
+    epsilon_sample: float,   # ε_sample
+    delta_sample: float,     # δ_sample
+    gamma_margin: float,     # η (edge)
+    mu_target: float,        # desired μ
+    *,
+    C: float = 1.0,
+) -> int:
+    """
+    Compute an upper bound T_cap on the boosting horizon from the theorem,
+    given a desired μ_target.
+
+    Corrected μ-theorem (log outside the sqrt):
+
+        μ = C * [
+                  sqrt(2 k) * ln((1+2η)/(1-2η)) * T^{3/2} * ρ *
+                  ( sqrt(log(1/δ_sample)) +
+                    sqrt(log(1/δ_sample) + 2 ε_sample) )
+                ] / ε_sample
+
+    This has the form μ = K * T^{3/2}, for a constant K depending on
+    (ρ, k, ε_sample, δ_sample, η, C). We invert it and return
+
+        T_cap = ceil( (μ_target / K)^{2/3} ).
+    """
+
+    if epsilon_sample <= 0:
+        raise ValueError("epsilon_sample must be positive.")
+    if not (0.0 < delta_sample < 1.0):
+        raise ValueError("delta_sample must lie in (0,1).")
+    if not (0.0 < gamma_margin < 0.5):
+        raise ValueError(
+            "gamma_margin η must lie in (0, 0.5) for ln((1+2η)/(1-2η)) to be well-defined."
+        )
+    if rho <= 0:
+        raise ValueError("rho must be positive.")
+    if k <= 0:
+        raise ValueError("k must be positive.")
+    if mu_target <= 0:
+        raise ValueError("mu_target must be positive.")
+    if C <= 0:
+        raise ValueError("C must be positive.")
+
+    # ln((1+2η)/(1-2η))
+    log_eta = math.log((1.0 + 2.0 * gamma_margin) / (1.0 - 2.0 * gamma_margin))
+
+    # sqrt(log(1/δ_sample)) and sqrt(log(1/δ_sample) + 2 ε_sample)
+    log_one_over_delta = _safe_log_one_over(delta_sample)
+    inner = math.sqrt(log_one_over_delta) + math.sqrt(log_one_over_delta + 2.0 * epsilon_sample)
+
+    # K = C * sqrt(2 k) * log_eta * ρ * inner / ε_sample   (log_eta outside the sqrt)
+    K = C * math.sqrt(2.0 * k) * log_eta * rho * inner / float(epsilon_sample)
+
+    # Invert μ = K T^{3/2}  →  T = (μ / K)^{2/3}
+    T_star = (mu_target / K) ** (2.0 / 3.0)
+
+    # Return an integer upper bound
+    T_cap = max(1, int(math.ceil(T_star)))
+    return T_cap
 
 
 class SpikyBoostingAlgorithm:
@@ -90,8 +151,10 @@ class SpikyBoostingAlgorithm:
         rho: Optional[float],            # may be None → taken from base optimizer if available
         mu: Optional[float],             # may be None → computed from theorem using base ρ and η as γ
         T: int,
+        epsilon_base: float,
+        delta_base: float,
         epsilon_sample: float,
-        delta: float,
+        delta_sample: float,
         beta: float,
         n: int,
         upper_bound: float = math.pi,
@@ -112,8 +175,15 @@ class SpikyBoostingAlgorithm:
         self.rho = None if rho is None else float(rho)
         self.mu = None if mu is None else float(mu)
         self.T = int(T)
+
+        # Base mechanism (database-level DP)
+        self.epsilon_base = float(epsilon_base)
+        self.delta_base = float(delta_base)
+
+        # Boosting / theorem (sample-level DP)
         self.epsilon_sample = float(epsilon_sample)
-        self.delta = float(delta)
+        self.delta_sample = float(delta_sample)
+
         self.beta = float(beta)
         self.n = int(n)
         self.upper_bound = float(upper_bound)
@@ -208,8 +278,8 @@ class SpikyBoostingAlgorithm:
                     print(f"Running base synopsis generator (attempt {attempt}/{self.max_base_restarts})...")
 
                 optimizer = SpikyNonconvexCoordinateDescent(
-                    epsilon=self.epsilon_sample,
-                    delta=self.delta,
+                    epsilon=self.epsilon_base,
+                    delta=self.delta_base,
                     beta=self.beta,
                     eta=self.eta,  # your 'eta' is used inside base optimizer as well
                     n=self.n,
@@ -319,11 +389,10 @@ class SpikyBoostingAlgorithm:
                     rho=self.rho,
                     k=self.num_queries,
                     epsilon_sample=self.epsilon_sample,  # ε_sample
-                    delta_sample=self.delta,             # δ_sample
+                    delta_sample=self.delta_sample,             # δ_sample
                     gamma_margin=self.eta,               # η
                     T=T_theorem,                         # theorem horizon, not T_cap
                     C=self.mu_constant,
-                    exponent_gamma=self.mu_gamma_exponent,
                 )
                 if verbose:
                     print(
@@ -333,8 +402,8 @@ class SpikyBoostingAlgorithm:
 
             lam = float(self.lambda_param)
             mu = float(self.mu)
-            # thr_current = lam + mu
-            thr_current = 0.5*lam
+            thr_current = lam + mu
+            # thr_current = 0.5*lam
             if (self.stop_threshold_abs is not None) and (self.stop_threshold_abs < thr_current):
                 thr_current = self.stop_threshold_abs
 

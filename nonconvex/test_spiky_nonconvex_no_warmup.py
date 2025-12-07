@@ -23,8 +23,8 @@ CONFIG = {
 
     "n": 5000,          # keep
     "k": 40,            # keep
-    "epsilon_base": 2,  # base mechanism privacy ε
-    "delta": 1e-2,     # ↓ from 1e-4 → ↑ λ (via log(1/δ))
+    "epsilon_base": 3,  # base mechanism privacy ε
+    "delta_base": 1e-6,     # ↓ from 1e-4 → ↑ λ (via log(1/δ))
     "beta": 0.2,        # keep (per-query failure prob for base mech)
     "eta": 0.05,
 
@@ -41,10 +41,10 @@ CONFIG = {
 }
 
 
-def build_optimizer(n, epsilon_base, delta, beta, eta, tau, upper_bound, lower_bound,offset):
+def build_optimizer(n, epsilon_base, delta_base, beta, eta, tau, upper_bound, lower_bound,offset):
     return SpikyNonconvexCoordinateDescent(
         epsilon=epsilon_base,
-        delta=delta,
+        delta=delta_base,
         beta=beta,
         eta=eta,
         n=n,
@@ -56,7 +56,7 @@ def build_optimizer(n, epsilon_base, delta, beta, eta, tau, upper_bound, lower_b
 
 
 def test_spiky_nonconvex_queries(
-    n=120, k=36, epsilon_base=3.0, delta=1e-6, beta=0.1, eta=0.01,
+    n=120, k=36, epsilon_base=3.0, delta_base=1e-6, beta=0.1, eta=0.01,
     max_iterations=5000, seed=None,
     tau=0.01, upper_bound=math.pi, lower_bound=-math.pi,
     freq_low=4.5, freq_high=7.5, amp_low=0.1, amp_high=1.0, offset=0.0
@@ -70,7 +70,7 @@ def test_spiky_nonconvex_queries(
     opt = build_optimizer(
         n=n,
         epsilon_base=epsilon_base,
-        delta=delta,
+        delta_base=delta_base,
         beta=beta,
         eta=eta,
         tau=tau,
@@ -94,7 +94,7 @@ def test_spiky_nonconvex_queries(
     # Now it's safe to print lambda-related info
     target = 0.5 + eta
     lam = float(opt.lambda_val)
-    noise_scale = opt.rho * math.sqrt(2 * k * math.log(1 / delta)) / epsilon_base
+    noise_scale = opt.rho * math.sqrt(2 * k * math.log(1 / delta_base)) / epsilon_base
     print(f"noise_scale={noise_scale:.6f}, lambda/2={lam/2:.6f}")
 
     # Initial loss BEFORE any optimization
@@ -136,7 +136,7 @@ def test_spiky_nonconvex_queries(
         f"loss_drop={loss_drop:.6f}"
     )
     print(
-        f"seed={seed} | n={n} k={k} eps_base={epsilon_base} delta={delta} "
+        f"seed={seed} | n={n} k={k} eps_base={epsilon_base} delta_base={delta_base} "
         f"beta={beta} eta={eta} "
         f"| target={target:.3f} | initial_satisfaction={initial_satisfaction:.3f} "
         f"| iters={iterations} | reached={reached} | "
@@ -148,7 +148,7 @@ def test_spiky_nonconvex_queries(
         "n": n,
         "k": k,
         "epsilon_base": epsilon_base,
-        "delta": delta,
+        "delta_base": delta_base,
         "beta": beta,
         "eta": eta,
         "target": target,
@@ -184,7 +184,7 @@ def parse_args_from_cli():
     p.add_argument("--n", type=int)
     p.add_argument("--k", type=int)
     p.add_argument("--epsilon_base", type=float)
-    p.add_argument("--delta", type=float)
+    p.add_argument("--delta_base", type=float)
     p.add_argument("--beta", type=float)
     p.add_argument("--eta", type=float)
     p.add_argument("--max_iterations", type=int)
@@ -211,7 +211,7 @@ if __name__ == "__main__":
         n=cfg["n"],
         k=cfg["k"],
         epsilon_base=cfg["epsilon_base"],
-        delta=cfg["delta"],
+        delta_base=cfg["delta_base"],
         beta=cfg["beta"],
         eta=cfg["eta"],
         max_iterations=cfg["max_iterations"],

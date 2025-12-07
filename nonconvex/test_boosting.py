@@ -14,7 +14,8 @@ import math
 from typing import Dict, List
 import numpy as np
 
-from spiky_boosting import SpikyBoostingAlgorithm
+from spiky_boosting import SpikyBoostingAlgorithm, compute_T_cap
+
 from test_spiky_nonconvex_no_warmup import CONFIG as BASE_CONFIG
 
 
@@ -39,6 +40,8 @@ CONFIG.setdefault("theorem_T", 100)              # T used in μ theorem. This is
 # These DO NOT default to the base ε, δ. Think of them as separate.
 CONFIG.setdefault("epsilon_sample", 0.5)       # sample-level ε for the theorem
 CONFIG.setdefault("delta_sample", 1e-2)        # sample-level δ for the theorem
+CONFIG.setdefault("mu", 0.05)                   # desired μ (excess over λ)
+
 
 # Just in case you ever remove any of these from BASE_CONFIG in the future,
 # keep safe defaults here.
@@ -50,7 +53,7 @@ CONFIG.setdefault("freq_low", 4.5)
 CONFIG.setdefault("freq_high", 7.5)
 CONFIG.setdefault("amp_low", 0.1)
 CONFIG.setdefault("amp_high", 1.0)
-CONFIG.setdefault("offset", 0.0)
+CONFIG.setdefault("offset", 0)
 
 
 def generate_queries(
@@ -80,14 +83,30 @@ def generate_real_data(n: int, lower: float, upper: float, rng: np.random.Genera
 def run_single(cfg: Dict, rng: np.random.Generator):
     n, k = cfg["n"], cfg["k"]
 
-    # Booster-level theorem parameters
+    # Booster-level theorem parameters (all pre-decided)
     eta = cfg["eta"]
-    epsilon_sample = cfg["epsilon_sample"]    # sample-level ε for boosting theorem
-    delta_sample = cfg["delta_sample"]        # sample-level δ for boosting theorem
+    epsilon_sample = cfg["epsilon_sample"]    # desired ε_sample
+    delta_sample = cfg["delta_sample"]        # desired δ_sample
+    mu = cfg["mu"]                            # desired μ
     beta = cfg["beta"]
 
-    tau, T_cap = cfg["tau"], cfg["max_iterations"]
+    tau = cfg["tau"]
     lower, upper = cfg["lower_bound"], cfg["upper_bound"]
+
+    # Sensitivity ρ: match SpikyNonconvexCoordinateDescent's formula
+    rho = (upper ** 2 + 1.0) / n
+
+    # Compute T_cap from the μ-theorem (inverting compute_mu_from_theorem)
+    T_cap = compute_T_cap(
+        rho=rho,
+        k=k,
+        epsilon_sample=epsilon_sample,
+        delta_sample=delta_sample,
+        gamma_margin=eta,
+        mu_target=mu,
+        C=float(cfg.get("mu_constant", 1.0)),
+    )
+
 
     # Build synthetic query family and real data
     A, W = generate_queries(
@@ -101,16 +120,18 @@ def run_single(cfg: Dict, rng: np.random.Generator):
     )
     real_data = generate_real_data(n, lower, upper, rng)
 
-    # Construct booster with λ, ρ, μ left as None → λ & ρ from base; μ from theorem with η as edge
+        # Construct booster with fixed μ and T_cap from the μ-theorem
     booster = SpikyBoostingAlgorithm(
         k=k,
-        lambda_param=None,   # ← pulled from base optimizer
-        eta=eta,             # ← used as edge γ in μ
-        rho=None,            # ← pulled from base optimizer
-        mu=None,             # ← computed from theorem
-        T=T_cap,
-        epsilon_sample=epsilon_sample,   # ← ε_sample for theorem (separate from base ε)
-        delta=delta_sample,              # ← δ_sample for theorem (separate from base δ)
+        lambda_param=None,          # ← pulled from base optimizer each round
+        eta=eta,                    # ← edge γ
+        rho=rho,                    # ← sensitivity (for logging)
+        mu=mu,                      # ← PRE-DECIDED μ (no longer computed inside)
+        T=T_cap,                    # ← boosting horizon from compute_T_cap
+        epsilon_base=cfg["epsilon_base"],
+        delta_base=cfg["delta_base"],
+        epsilon_sample=epsilon_sample,
+        delta_sample=delta_sample,
         beta=beta,
         n=n,
         upper_bound=upper,
@@ -119,13 +140,15 @@ def run_single(cfg: Dict, rng: np.random.Generator):
         mu_constant=float(cfg.get("mu_constant", 1.0)),
         min_rounds=int(cfg.get("min_rounds", 1)),
         stop_threshold_abs=cfg.get("stop_threshold_abs", None),
-        theorem_T=int(cfg.get("theorem_T")), 
+        theorem_T=T_cap,            # unused when mu is provided; kept for compatibility
         offset=float(cfg.get("offset", 0.0)),
     )
 
+
     booster.set_queries(A, W)
 
-    print("=== Testing Spiky Boosting Algorithm (λ,ρ from base; μ uses η as edge) ===")
+    print("=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===")
+
     print(
         f"n={n} | |Q|={k} | "
         f"ε_sample={epsilon_sample} δ_sample={delta_sample} β={beta} η={eta} | T_cap={T_cap}"
@@ -167,7 +190,7 @@ def run_single(cfg: Dict, rng: np.random.Generator):
 
     print("\n=== Final Statistics ===")
     print(f"Early stopped: {results['early_stopped']} after {results['iterations_run']} iteration(s)")
-    print(f"λ (from base)={lam:.6f}, μ (theorem w/ η edge)={mu:.6f}, threshold used={thr:.6f}")
+    print(f"λ (from base)={lam:.6f}, μ (fixed target)={mu:.6f}, threshold used={thr:.6f}")
     print(f"Share within threshold: {np.mean(errors <= thr):.3f}")
 
     return results, errors, lam, mu, thr
