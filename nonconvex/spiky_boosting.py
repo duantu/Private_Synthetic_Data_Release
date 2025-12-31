@@ -23,6 +23,11 @@ import numpy as np
 
 from spiky_nonconvex_newton_gd import SpikyNonconvexCoordinateDescent
 
+class BaseSynopsisFailed(RuntimeError):
+    """Raised when the base synopsis generator cannot reach the target satisfaction after max attempts."""
+    pass
+
+
 
 def _safe_log_one_over(x: float, eps: float = 1e-12) -> float:
     """Stable log(1/x)."""
@@ -141,6 +146,60 @@ def compute_T_cap(
     T_cap = max(1, int(math.ceil(T_star)))
     return T_cap
 
+def compute_epsilon_sample_from_theorem(
+    rho: float,
+    k: int,
+    delta_sample: float,   # δ_sample
+    gamma_margin: float,   # η (edge)
+    T: int,                # boosting horizon in the theorem
+    mu: float,             # target μ
+) -> float:
+    r"""
+    Compute ε_sample from
+
+        ε_sample = sqrt(2 k T log(1/δ_sample)) * (α 4 T ρ / μ)
+                   + k T (α 4 T ρ / μ)^2,
+
+    where α = (1/2) ln((1+2η)/(1-2η)).
+
+    Parameters
+    ----------
+    rho          : sensitivity ρ
+    k            : |Q|
+    delta_sample : δ_sample
+    gamma_margin : η (edge)
+    T            : boosting horizon
+    mu           : target μ
+    """
+    if rho <= 0:
+        raise ValueError("rho must be positive.")
+    if k <= 0:
+        raise ValueError("k must be positive.")
+    if T <= 0:
+        raise ValueError("T must be positive.")
+    if mu <= 0:
+        raise ValueError("mu must be positive.")
+    if not (0.0 < delta_sample < 1.0):
+        raise ValueError("delta_sample must lie in (0, 1).")
+    if not (0.0 < gamma_margin < 0.5):
+        raise ValueError(
+            "gamma_margin η must lie in (0, 0.5) for ln((1+2η)/(1-2η)) to be well-defined."
+        )
+
+    # α = 1/2 * ln((1+2η)/(1-2η))
+    alpha = 0.5 * math.log((1.0 + 2.0 * gamma_margin) / (1.0 - 2.0 * gamma_margin))
+
+    # sqrt(2 k T log(1/δ_sample))
+    log_one_over_delta = _safe_log_one_over(delta_sample)
+    sqrt_term = math.sqrt(2.0 * k * T * log_one_over_delta)
+
+    # common factor (α 4 T ρ / μ)
+    factor = alpha * 4.0 * T * rho / float(mu)
+
+    eps_sample = sqrt_term * factor + k * T * (factor ** 2)
+    return float(eps_sample)
+
+
 
 class SpikyBoostingAlgorithm:
     def __init__(
@@ -164,10 +223,12 @@ class SpikyBoostingAlgorithm:
         mu_constant: float = 1.0,        # hidden constant C in μ
         mu_gamma_exponent: int = 3,      # kept for compatibility; not currently used
         min_rounds: int = 1,
-        stop_threshold_abs: Optional[float] = None,
-        max_base_restarts: int = 1000,   # max re-tries per boosting round
+        stop_threshold_abs: Optional[float] = None,   
         theorem_T: int = 5,              # T used in the theorem for μ, separate from T_cap
         offset: float = 0.0,
+        max_base_attempts: int = 20,       # max re-tries per boosting round
+        repro_seed: Optional[int] = None,
+
     ):
         self.k = int(k)
         self.lambda_param = None if lambda_param is None else float(lambda_param)
@@ -175,6 +236,7 @@ class SpikyBoostingAlgorithm:
         self.rho = None if rho is None else float(rho)
         self.mu = None if mu is None else float(mu)
         self.T = int(T)
+        self.max_base_attempts = int(max_base_attempts)
 
         # Base mechanism (database-level DP)
         self.epsilon_base = float(epsilon_base)
@@ -189,7 +251,7 @@ class SpikyBoostingAlgorithm:
         self.upper_bound = float(upper_bound)
         self.lower_bound = float(lower_bound)
         self.tau = float(tau)
-        self.max_base_restarts = int(max_base_restarts)
+        
         self.offset = float(offset)  
 
         self.mu_constant = float(mu_constant)
@@ -207,22 +269,49 @@ class SpikyBoostingAlgorithm:
         self.num_queries: Optional[int] = None
         self.all_synopses: List[Dict] = []
 
+        self.repro_seed = repro_seed
+
+    def _derive_attempt_seed(self, t: int, attempt: int) -> Optional[int]:
+        if self.repro_seed is None:
+            return None
+        x = int(self.repro_seed) & 0xFFFFFFFF
+        x = (x * 1000003 + int(t)) & 0xFFFFFFFF
+        x = (x * 1000003 + int(attempt)) & 0xFFFFFFFF
+        return x
+
+
     # ---------- query plumbing ----------
 
-    def set_queries(self, amplitudes_matrix: np.ndarray, frequencies_vector: np.ndarray):
+    def set_queries(self,
+                    amplitudes_matrix: np.ndarray,
+                    frequencies_vector: np.ndarray,
+                    trig_flags: Optional[np.ndarray] = None):
         A = np.asarray(amplitudes_matrix, dtype=float)
         W = np.asarray(frequencies_vector, dtype=float)
         if A.shape[0] != W.shape[0]:
             raise ValueError("Number of amplitude vectors must match number of frequencies.")
         if A.shape[1] != self.n:
             raise ValueError(f"Amplitude vector length {A.shape[1]} must equal n {self.n}.")
-        self.Q = {"amplitudes": A, "frequencies": W}
+        if trig_flags is None:
+            flags = np.zeros(A.shape[0], dtype=bool)
+        else:
+            flags = np.asarray(trig_flags, dtype=bool)
+            if flags.shape[0] != A.shape[0]:
+                raise ValueError("trig_flags must have same length as number of queries.")
+        self.Q = {"amplitudes": A, "frequencies": W, "trig_flags": flags}
         self.num_queries = int(W.shape[0])
+
 
     def compute_query_answer(self, synopsis_data: np.ndarray, query_idx: int) -> float:
         amps = self.Q["amplitudes"][query_idx]
         w = self.Q["frequencies"][query_idx]
-        return float(np.sum(synopsis_data ** 2 + amps * np.sin(w * synopsis_data)) / self.n + self.offset)
+        use_cos = bool(self.Q["trig_flags"][query_idx])
+        if use_cos:
+            trig = np.cos(w * synopsis_data)
+        else:
+            trig = np.sin(w * synopsis_data)
+        return float(np.sum(synopsis_data ** 2 + amps * trig) / self.n + self.offset)
+
 
     def is_lambda_accurate(self, error: float, lambda_param: float) -> bool:
         return error <= lambda_param
@@ -252,9 +341,15 @@ class SpikyBoostingAlgorithm:
         for q in range(self.num_queries):
             amps = self.Q["amplitudes"][q]
             w = self.Q["frequencies"][q]
+            use_cos = bool(self.Q["trig_flags"][q])
+            if use_cos:
+                trig = np.cos(w * real_data)
+            else:
+                trig = np.sin(w * real_data)
             true_answers[q] = float(
-                np.sum(real_data ** 2 + amps * np.sin(w * real_data)) / self.n + self.offset
+                np.sum(real_data ** 2 + amps * trig) / self.n + self.offset
             )
+
 
         for t in range(1, self.T + 1):
             if verbose:
@@ -264,46 +359,59 @@ class SpikyBoostingAlgorithm:
             sampled_indices = np.arange(self.num_queries, dtype=int)
             sampled_amplitudes = self.Q["amplitudes"][sampled_indices]
             sampled_frequencies = self.Q["frequencies"][sampled_indices]
+            sampled_trig_flags = self.Q["trig_flags"][sampled_indices]
             sampled_weights = D.astype(float).tolist()
+
 
             # === Run base optimizer, with restarts until satisfaction ≥ 0.5 + eta ===
             target_ratio = 0.5 + self.eta
             best_optimizer = None
             best_ret = None
             best_satisfaction = -1.0
+            best_base_iters = None
+
+            best_attempt_idx = None
+            best_attempt_seed = None
+
+            accepted_attempt_idx = None
+            accepted_attempt_seed = None
+
             base_iters = None
 
-            for attempt in range(1, self.max_base_restarts + 1):
+            for attempt in range(self.max_base_attempts):
                 if verbose:
-                    print(f"Running base synopsis generator (attempt {attempt}/{self.max_base_restarts})...")
+                    print(f"Running base synopsis generator (attempt {attempt + 1}/{self.max_base_attempts})...")
+                attempt_seed = None
+                if self.repro_seed is not None:
+                    attempt_seed = self._derive_attempt_seed(t, attempt)
 
                 optimizer = SpikyNonconvexCoordinateDescent(
                     epsilon=self.epsilon_base,
                     delta=self.delta_base,
                     beta=self.beta,
-                    eta=self.eta,  # your 'eta' is used inside base optimizer as well
+                    eta=self.eta,
                     n=self.n,
                     tau=self.tau,
                     upper_bound=self.upper_bound,
                     lower_bound=self.lower_bound,
                     offset=self.offset,
+                    seed=attempt_seed,
                 )
-                optimizer.set_queries_and_amplitudes(sampled_amplitudes, sampled_frequencies, sampled_weights)
+                optimizer.set_queries_and_amplitudes(
+                    sampled_amplitudes,
+                    sampled_frequencies,
+                    sampled_weights,
+                    sampled_trig_flags,
+                )
+                if verbose:
+                    lam = float(optimizer.lambda_val)
+                    print(f"  [base params] lambda={lam:.6f}, 0.9 lambda={lam*0.9:.6f}, cap_step={float(optimizer.cap_step):.6f}")
 
-                # IMPORTANT: keep the same real_data across all attempts and rounds
                 optimizer.generate_data(real_data=real_data)
-
-                # Run base optimizer and capture how many iterations it actually ran
                 ret = optimizer.run_coordinate_descent(max_iterations=1000, verbose=False)
-
-                # Satisfaction ratio after this attempt
                 sat = float(optimizer.compute_weighted_satisfaction_ratio())
-                if sat > best_satisfaction:
-                    best_satisfaction = sat
-                    best_optimizer = optimizer
-                    best_ret = ret
 
-                # Extract iteration count
+                # --- extract iteration count (try ret first, then optimizer attrs) ---
                 base_iters_local = None
                 if isinstance(ret, dict):
                     for key in ("num_iterations", "iterations", "iters", "t", "steps", "n_iter"):
@@ -313,9 +421,10 @@ class SpikyBoostingAlgorithm:
                                 break
                             except Exception:
                                 pass
+
                 if base_iters_local is None:
                     for attr in ("num_iterations", "iterations_run", "last_num_iterations",
-                                 "iters_run", "n_iter_", "n_iter"):
+                                "iters_run", "n_iter_", "n_iter"):
                         if hasattr(optimizer, attr):
                             try:
                                 base_iters_local = int(getattr(optimizer, attr))
@@ -323,43 +432,63 @@ class SpikyBoostingAlgorithm:
                             except Exception:
                                 pass
 
+                # --- always track best attempt ---
+                if sat > best_satisfaction:
+                    best_satisfaction = sat
+                    best_optimizer = optimizer
+                    best_ret = ret
+                    best_base_iters = base_iters_local
+
+                    best_attempt_idx = attempt
+                    best_attempt_seed = attempt_seed
+
                 if verbose:
                     print(
-                        f"  attempt {attempt}: satisfaction={sat:.4f} "
+                        f"  attempt {attempt+1}: satisfaction={sat:.4f} "
                         f"(target={target_ratio:.4f}), "
                         f"iters={base_iters_local if base_iters_local is not None else 'unknown'}"
                     )
 
-                # If this attempt is "truly satisfactory", accept and stop restarting
+                # --- accept immediately if meets target ---
                 if sat >= target_ratio:
                     base_iters = base_iters_local
+                    best_optimizer = optimizer
+                    best_ret = ret
+                    best_satisfaction = sat
+                    best_base_iters = base_iters_local
+
+                    accepted_attempt_idx = attempt
+                    accepted_attempt_seed = attempt_seed
                     break
 
-            # If never hit target_ratio, fall back to the best attempt
-            if base_iters is None:
-                if isinstance(best_ret, dict):
-                    for key in ("num_iterations", "iterations", "iters", "t", "steps", "n_iter"):
-                        if key in best_ret:
-                            try:
-                                base_iters = int(best_ret[key])
-                                break
-                            except Exception:
-                                pass
-                if verbose:
-                    print(
-                        f"WARNING: base synopsis never reached satisfaction ≥ {target_ratio:.4f} "
-                        f"after {self.max_base_restarts} attempts. "
-                        f"Using best attempt with satisfaction={best_satisfaction:.4f}."
-                    )
+            # If never accepted, FAIL this boosting run (do NOT fall back to best attempt).
+            if best_optimizer is None:
+                raise RuntimeError("Base optimizer produced no attempts (unexpected).")
+
+            if accepted_attempt_idx is None:
+                # No attempt hit the weak-learning target after max_base_attempts.
+                # Treat this as a hard failure so the outer test can start a fresh run.
+                raise BaseSynopsisFailed(
+                    f"Base synopsis failed: never reached satisfaction >= {target_ratio:.4f} "
+                    f"after {self.max_base_attempts} attempts at boosting round t={t}. "
+                    f"Best satisfaction={best_satisfaction:.4f} (best_attempt={best_attempt_idx+1 if best_attempt_idx is not None else 'unknown'}, "
+                    f"best_seed={best_attempt_seed})."
+                )
 
             optimizer = best_optimizer
             ret = best_ret
+            if base_iters is None:
+                base_iters = best_base_iters
+
+            if (base_iters is None) and verbose:
+                print("WARNING: base synopsis iteration count is unknown for the accepted attempt.")
 
             if verbose:
                 print(
                     f"Base synopsis generator iterations (final accepted attempt): "
                     f"{base_iters if base_iters is not None else 'unknown'}"
                 )
+
 
             # === Pull λ and ρ from the base optimizer ===
             base_lambda = getattr(optimizer, "lambda_val", None)
@@ -429,6 +558,9 @@ class SpikyBoostingAlgorithm:
                     "lambda_accurate": lambda_accurate.copy(),
                     "lambda_mu_accurate": lambda_mu_accurate.copy(),
                     "base_iterations": base_iters,
+                    "accepted_attempt": accepted_attempt_idx,
+                    "accepted_attempt_seed": accepted_attempt_seed,
+
                 }
             )
 

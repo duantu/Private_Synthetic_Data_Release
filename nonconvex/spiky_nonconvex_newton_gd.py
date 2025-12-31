@@ -8,6 +8,7 @@ class SpikyNonconvexCoordinateDescent:
 
     Query j:
       f_j(X) = (1/n) * sum_i (x_i^2 + a_{j,i} * sin(w_j * x_i)) + OFFSET
+      f_j(X) = (1/n) * sum_i (x_i^2 + a_{j,i} * cos(w_j * x_i)) + OFFSET
 
     Loss:
       L = sum_j [ exp((f_j(fake)-y_j)/λ - 1) + exp((y_j-f_j(fake))/λ - 1) ]
@@ -79,6 +80,8 @@ class SpikyNonconvexCoordinateDescent:
         self.amplitudes_matrix = None
         self.frequencies_vector = None
         self.k = 0
+        self.trig_flags = None  # False → sin, True → cos
+
 
         # Update controls
         self.update_mode = update_mode
@@ -103,7 +106,8 @@ class SpikyNonconvexCoordinateDescent:
     def set_queries_and_amplitudes(self,
                                    amplitudes_matrix: np.ndarray,
                                    frequencies_vector: np.ndarray,
-                                   weights: List[float]):
+                                   weights: List[float],
+                                   trig_flags: Optional[np.ndarray] = None):
         amplitudes_matrix = np.asarray(amplitudes_matrix, dtype=float)
         frequencies_vector = np.asarray(frequencies_vector, dtype=float)
         k, n_amps = amplitudes_matrix.shape
@@ -121,14 +125,24 @@ class SpikyNonconvexCoordinateDescent:
         if np.any(frequencies_vector <= 0):
             raise ValueError("All frequencies must be positive")
 
+        if trig_flags is None:
+            # Default: all sine queries
+            self.trig_flags = np.zeros(k, dtype=bool)
+        else:
+            trig_flags = np.asarray(trig_flags, dtype=bool)
+            if trig_flags.shape[0] != k:
+                raise ValueError("trig_flags must have length k")
+            self.trig_flags = trig_flags.copy()
+
         self.amplitudes_matrix = amplitudes_matrix.copy()
         self.frequencies_vector = frequencies_vector.copy()
         self.query_weights = np.array(weights, dtype=float)
         self.k = k
         self.sampled_queries = np.array([2.0] * k)
 
-        # lambda = ln(k/beta) * 2 * rho * sqrt(2k * ln(1/delta)) / epsilon
-        self.lambda_val = (math.log(self.k / self.beta) * 2 * self.rho *
+
+        # lambda = ln(k/beta) * 100 * rho * sqrt(2k * ln(1/delta)) / epsilon
+        self.lambda_val = (math.log(self.k / self.beta) * 10 * self.rho *
                            math.sqrt(2 * self.k * math.log(1 / self.delta_base))) / self.epsilon
 
         # If cap not specified, set it relative to lambda (bigger moves)
@@ -157,6 +171,13 @@ class SpikyNonconvexCoordinateDescent:
     # -------------------------------
     # Core computations
     # -------------------------------
+    def _satisfaction_threshold(self) -> float:
+        """
+        Error threshold for declaring a query 'satisfied'.
+        Currently set to (99/100) * lambda.
+        """
+        return 0.9 * self.lambda_val
+
     def compute_query_outputs(self):
         if self.amplitudes_matrix is None or self.frequencies_vector is None:
             raise ValueError("Must set amplitude matrix and frequency vector first")
@@ -173,14 +194,22 @@ class SpikyNonconvexCoordinateDescent:
         for index in range(k):
             amps = self.amplitudes_matrix[index]
             freq = self.frequencies_vector[index]
+            use_cos = bool(self.trig_flags[index]) if self.trig_flags is not None else False
 
-            sum_real = np.sum(self.real_X**2 + amps * np.sin(freq * self.real_X))
+            if use_cos:
+                trig_real = np.cos(freq * self.real_X)
+                trig_fake = np.cos(freq * self.fake_X)
+            else:
+                trig_real = np.sin(freq * self.real_X)
+                trig_fake = np.sin(freq * self.fake_X)
+
+            sum_real = np.sum(self.real_X**2 + amps * trig_real)
             self.real_output[index] = sum_real / self.n + self.offset
 
             self.lap_noise[index] = self.rng.laplace(loc=0.0, scale=noise_scale)
             self.real_data_noisy_output[index] = self.real_output[index] + self.lap_noise[index]
 
-            sum_fake = np.sum(self.fake_X**2 + amps * np.sin(freq * self.fake_X))
+            sum_fake = np.sum(self.fake_X**2 + amps * trig_fake)
             self.fake_output[index] = sum_fake / self.n + self.offset
 
             self.error[index] = abs(self.fake_output[index] - self.real_data_noisy_output[index])
@@ -188,8 +217,10 @@ class SpikyNonconvexCoordinateDescent:
     def compute_weighted_satisfaction_ratio(self) -> float:
         if self.query_weights is None:
             raise ValueError("Must set queries and weights first")
-        satisfied_mask = self.error < self.lambda_val / 2
+        threshold = self._satisfaction_threshold()
+        satisfied_mask = self.error < threshold
         return float(np.sum(self.query_weights[satisfied_mask]))
+
 
     # -------------------------------
     # Derivatives for a single coordinate
@@ -203,8 +234,15 @@ class SpikyNonconvexCoordinateDescent:
         for j in range(self.k):
             a_i = self.amplitudes_matrix[j, i]
             w_i = self.frequencies_vector[j]
+            use_cos = bool(self.trig_flags[j]) if self.trig_flags is not None else False
 
-            dq_dxi = n_inv * (2 * xi + w_i * a_i * np.cos(w_i * xi))
+            if use_cos:
+                # f_j = x^2 + a cos(w x) → ∂/∂x = 2x - a w sin(w x)
+                dq_dxi = n_inv * (2 * xi - w_i * a_i * np.sin(w_i * xi))
+            else:
+                # f_j = x^2 + a sin(w x) → ∂/∂x = 2x + a w cos(w x)
+                dq_dxi = n_inv * (2 * xi + w_i * a_i * np.cos(w_i * xi))
+
             diff = self.fake_output[j] - self.real_data_noisy_output[j]
 
             gplus  =  (dq_dxi * np.exp( diff / lam - 1.0) / lam)
@@ -221,9 +259,19 @@ class SpikyNonconvexCoordinateDescent:
         for j in range(self.k):
             a_i = self.amplitudes_matrix[j, i]
             w_i = self.frequencies_vector[j]
+            use_cos = bool(self.trig_flags[j]) if self.trig_flags is not None else False
 
-            dq_dxi   = n_inv * (2 * xi + w_i * a_i * np.cos(w_i * xi))
-            d2q_dxi2 = n_inv * (2 - (w_i**2) * a_i * np.sin(w_i * xi))
+            if use_cos:
+                # f_j = x^2 + a cos(w x)
+                # ∂ = 2x - a w sin(w x)
+                # ∂² = 2 - a w^2 cos(w x)
+                dq_dxi   = n_inv * (2 * xi - w_i * a_i * np.sin(w_i * xi))
+                d2q_dxi2 = n_inv * (2 - (w_i**2) * a_i * np.cos(w_i * xi))
+            else:
+                # f_j = x^2 + a sin(w x)
+                dq_dxi   = n_inv * (2 * xi + w_i * a_i * np.cos(w_i * xi))
+                d2q_dxi2 = n_inv * (2 - (w_i**2) * a_i * np.sin(w_i * xi))
+
 
             diff = self.fake_output[j] - self.real_data_noisy_output[j]
             epos = np.exp( diff / lam - 1.0)
@@ -253,8 +301,19 @@ class SpikyNonconvexCoordinateDescent:
 
         a_col = self.amplitudes_matrix[:, idx]     # (k,)
         w     = self.frequencies_vector            # (k,)
+        use_cos = self.trig_flags if self.trig_flags is not None else np.zeros(self.k, dtype=bool)
 
-        delta_queries = ((x_new**2 - x_old**2) + a_col * (np.sin(w * x_new) - np.sin(w * x_old))) / self.n
+        delta_queries = np.zeros(self.k, dtype=float)
+        for j in range(self.k):
+            if use_cos[j]:
+                trig_new = np.cos(w[j] * x_new)
+                trig_old = np.cos(w[j] * x_old)
+            else:
+                trig_new = np.sin(w[j] * x_new)
+                trig_old = np.sin(w[j] * x_old)
+            delta_queries[j] = (x_new**2 - x_old**2) + a_col[j] * (trig_new - trig_old)
+        delta_queries /= self.n
+
         fake_output_try = self.fake_output + delta_queries
 
         loss_try = self._loss_from_fake_output(fake_output_try)
@@ -413,10 +472,12 @@ class SpikyNonconvexCoordinateDescent:
             print(f"Initial weighted satisfaction ratio: {initial_weighted_satisfaction:.4f}")
             print(f"Target weighted satisfaction ratio: {target_ratio:.4f}")
             print(f"Lambda: {self.lambda_val:.6f}")
-            print(f"Lambda/2: {self.lambda_val/2:.6f}")
+            thr = self._satisfaction_threshold()
+            print(f"0.9 Lambda: {thr:.6f}")
+            print(f"Queries above 0.9 lambda: {np.sum(self.error > thr)}")
             print(f"Tau (reporting only): {self.tau}")
             print(f"Number of queries: {self.k}")
-            print(f"Queries above lambda/2: {np.sum(self.error > self.lambda_val/2)}")
+            print(f"Queries above 99/100  lambda: {np.sum(self.error > (99/100)*self.lambda_val)}")
             print("NOTE: Stopping when satisfaction ratio >= 0.5 + eta (nonconvex setting).")
 
         # while (num_iterations < max_iterations and
@@ -430,12 +491,13 @@ class SpikyNonconvexCoordinateDescent:
 
             if verbose and num_iterations % 10 == 0:
                 current_satisfaction = self.compute_weighted_satisfaction_ratio()
-                queries_above_threshold = np.sum(self.error > self.lambda_val / 2)
+                threshold = self._satisfaction_threshold()
+                queries_above_threshold = np.sum(self.error > threshold)
                 print(
                     f"Iteration {num_iterations}: "
                     f"Loss update = {total_loss_update:.6f}, "
                     f"Weighted satisfaction = {current_satisfaction:.4f}, "
-                    f"Queries above lambda/2 = {queries_above_threshold}"
+                    f"Queries above 0.9 lambda = {queries_above_threshold}"
                 )
         print("[DEBUG] Loop exited because:")
         print(f"  - num_iterations < max_iterations? "
@@ -446,11 +508,14 @@ class SpikyNonconvexCoordinateDescent:
             f"{self.compute_weighted_satisfaction_ratio() < target_ratio}")
         
         final_weighted_satisfaction = self.compute_weighted_satisfaction_ratio()
+        threshold = self._satisfaction_threshold()
         final_error_stats = {
             'mean_error': float(np.mean(self.error)),
             'max_error': float(np.max(self.error)),
-            'queries_above_lambda_half': int(np.sum(self.error > self.lambda_val / 2))
+            'queries_above_0p9_lambda': int(np.sum(self.error > threshold)),
         }
+
+
 
         results = {
             'num_iterations': num_iterations,
@@ -482,6 +547,7 @@ class SpikyNonconvexCoordinateDescent:
             print(f"  Both conditions met: {results['both_conditions_met']}")
             print(f"  Final weighted satisfaction: {final_weighted_satisfaction:.4f}")
             print(f"  Final loss update: {total_loss_update:.6f}")
-            print(f"  Queries above lambda/2: {final_error_stats['queries_above_lambda_half']}")
+            print(f"  Queries above 0.9 lambda: {final_error_stats['queries_above_0.9_lambda']}")
+
 
         return results

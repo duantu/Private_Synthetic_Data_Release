@@ -19,29 +19,97 @@ from spiky_nonconvex_newton_gd import SpikyNonconvexCoordinateDescent
 
 # ---- SINGLE PLACE TO EDIT ----
 CONFIG = {
-    "num_runs": 10,
+    "num_runs": 5,
 
-    "n": 5000,          # keep
+    "n": 2000,          # keep
     "k": 40,            # keep
-    "epsilon_base": 3,  # base mechanism privacy ε
-    "delta_base": 1e-6,     # ↓ from 1e-4 → ↑ λ (via log(1/δ))
-    "beta": 0.2,        # keep (per-query failure prob for base mech)
-    "eta": 0.05,
+    "epsilon_base": 5,  # base mechanism privacy ε
+    "delta_base": 1e-1,     # ↓ from 1e-4 → ↑ λ (via log(1/δ))
+    "beta": 0.3,        # keep (per-query failure prob for base mech)
+    "eta": 0.01,
 
-    "max_iterations": 5000,
+    "max_iterations": 100,
     "seed": None,
-    "tau": 1e-20,      # let more outer steps happen before stopping on tiny loss updates
+    "tau": 1e-10,      # let more outer steps happen before stopping on tiny loss updates
     "upper_bound": math.pi,
     "lower_bound": -math.pi,
-    "freq_low": 0.5,
-    "freq_high": 2,
+    "freq_low": 1,
+    "freq_high": 2.2,
     "amp_low": 0.1,
     "amp_high": 1.0,
     "offset": 0.0,
+    "p_hard": 0.05,   # fraction of hard queries
+    "amp_mid": 0.5,  # split point between easy and hard amplitudes
 }
 
+def generate_queries_mixture(
+    k: int,
+    n: int,
+    amp_low: float,
+    amp_high: float,
+    amp_mid: float,
+    freq_low: float,
+    freq_high: float,
+    p_hard: float,
+    rng: np.random.Generator,
+):
+    # Clamp amp_mid into [amp_low, amp_high]
+    amp_mid = max(amp_low, min(amp_mid, amp_high))
 
-def build_optimizer(n, epsilon_base, delta_base, beta, eta, tau, upper_bound, lower_bound,offset):
+    k_hard = int(round(p_hard * k))
+    k_easy = k - k_hard
+
+    amplitudes_matrix = np.zeros((k, n), dtype=float)
+
+    # ---- EASY ----
+    if k_easy > 0:
+        amplitudes_matrix[:k_easy, :] = rng.uniform(
+            amp_low, amp_mid, size=(k_easy, n)
+        )
+        freqs_easy = rng.uniform(freq_low, freq_high, size=k_easy)
+    else:
+        freqs_easy = np.array([], dtype=float)
+
+    # ---- HARD ----
+    if k_hard > 0:
+        amplitudes_matrix[k_easy:, :] = rng.uniform(
+            amp_mid, amp_high, size=(k_hard, n)
+        )
+        hard_freq_low = freq_high * 3
+        hard_freq_high = freq_high * 4
+        freqs_hard = rng.uniform(hard_freq_low, hard_freq_high, size=k_hard)
+    else:
+        freqs_hard = np.array([], dtype=float)
+
+    frequencies_vector = np.concatenate([freqs_easy, freqs_hard])
+
+    # ---- trig flags ----
+    trig_flags = np.zeros(k, dtype=bool)   # False=sin, True=cos
+    trig_flags[1:k_easy:2] = True
+    trig_flags[k_easy + 1 : k : 2] = True
+
+    # ---- shuffle ----
+    perm = rng.permutation(k)
+    return (
+        amplitudes_matrix[perm],
+        frequencies_vector[perm],
+        trig_flags[perm],
+    )
+
+
+
+def build_optimizer(
+    n,
+    epsilon_base,
+    delta_base,
+    beta,
+    eta,
+    tau,
+    upper_bound,
+    lower_bound,
+    offset,
+    seed=None,  
+):
     return SpikyNonconvexCoordinateDescent(
         epsilon=epsilon_base,
         delta=delta_base,
@@ -52,7 +120,9 @@ def build_optimizer(n, epsilon_base, delta_base, beta, eta, tau, upper_bound, lo
         upper_bound=upper_bound,
         lower_bound=lower_bound,
         offset=offset,
+        seed=seed,  
     )
+
 
 
 def test_spiky_nonconvex_queries(
@@ -64,7 +134,7 @@ def test_spiky_nonconvex_queries(
     # Seed selection
     if seed is None:
         seed = secrets.randbits(32)
-    np.random.seed(seed)  # drives amplitudes/frequencies
+    # np.random.seed(seed)  # drives amplitudes/frequencies
 
     # Build optimizer
     opt = build_optimizer(
@@ -77,13 +147,26 @@ def test_spiky_nonconvex_queries(
         upper_bound=upper_bound,
         lower_bound=lower_bound,
         offset=offset,
+        seed = seed 
     )
 
-    # Random queries (amplitudes & freqs)
-    amplitudes_matrix = np.random.uniform(amp_low, amp_high, size=(k, n))
-    frequencies_vector = np.random.uniform(freq_low, freq_high, size=k)
+    # Use the optimizer's RNG for consistency (and to match the boosting style better)
+    rng = opt.rng  # np.random.Generator
+
+    amplitudes_matrix, frequencies_vector, trig_flags = generate_queries_mixture(
+        k=k,
+        n=n,
+        amp_low=amp_low,
+        amp_high=amp_high,
+        amp_mid=CONFIG.get("amp_mid", 0.5),
+        freq_low=freq_low,
+        freq_high=freq_high,
+        p_hard=CONFIG.get("p_hard", 0.05),
+        rng=rng,
+    )
+
     weights = [1.0 / k] * k
-    opt.set_queries_and_amplitudes(amplitudes_matrix, frequencies_vector, weights)
+    opt.set_queries_and_amplitudes(amplitudes_matrix, frequencies_vector, weights, trig_flags=trig_flags)
 
     # Generate data
     opt.generate_data()
@@ -95,7 +178,7 @@ def test_spiky_nonconvex_queries(
     target = 0.5 + eta
     lam = float(opt.lambda_val)
     noise_scale = opt.rho * math.sqrt(2 * k * math.log(1 / delta_base)) / epsilon_base
-    print(f"noise_scale={noise_scale:.6f}, lambda/2={lam/2:.6f}")
+    print(f"noise_scale={noise_scale:.6f}, 0.9*lambda={0.9*lam:.6f}")
 
     # Initial loss BEFORE any optimization
     loss_before = float(
@@ -172,7 +255,6 @@ def test_multiple_runs(num_runs=10, seed=None, **kwargs):
     base = secrets.randbits(32) if seed is None else int(seed)
     for i in range(num_runs):
         s = base + i if seed is None else (seed + i)
-        np.random.seed(s)
         _ = test_spiky_nonconvex_queries(seed=s, **kwargs)
         print("")
 

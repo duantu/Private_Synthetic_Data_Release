@@ -1,0 +1,1339 @@
+Global seed: 1767076465
+
+========== RUN 1 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=1 run_seed=7113224414433657079
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.7250 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.675850 med=0.631374 mean=0.604270 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.675850  med=0.631374  mean=0.604270  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 2 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=2 run_seed=8475688023589898070
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5500 (target=0.5100), iters=22
+Base synopsis generator iterations (final accepted attempt): 22
+[check] median-of-answers: max_err=0.671939 med=0.616265 mean=0.621549 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.671939  med=0.616265  mean=0.621549  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 22
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 3 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=3 run_seed=1058666166622968735
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 1: satisfaction=0.0000 (target=0.5100), iters=8
+Running base synopsis generator (attempt 2/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 2: satisfaction=0.0000 (target=0.5100), iters=8
+Running base synopsis generator (attempt 3/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 3: satisfaction=0.5250 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.680728 med=0.663740 mean=0.626183 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.680728  med=0.663740  mean=0.626183  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 4 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=4 run_seed=2473561503075983951
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5500 (target=0.5100), iters=19
+Base synopsis generator iterations (final accepted attempt): 19
+[check] median-of-answers: max_err=0.687745 med=0.645064 mean=0.639279 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.687745  med=0.645064  mean=0.639279  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 19
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 5 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=5 run_seed=4993500892773258471
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.9000 (target=0.5100), iters=24
+Base synopsis generator iterations (final accepted attempt): 24
+[check] median-of-answers: max_err=0.654086 med=0.606086 mean=0.595354 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.654086  med=0.606086  mean=0.595354  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 24
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 6 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=6 run_seed=32890822120110300
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.8250 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.662671 med=0.626043 mean=0.603676 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.662671  med=0.626043  mean=0.603676  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 7 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=7 run_seed=6993085355610253853
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.9500 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.634341 med=0.600950 mean=0.588583 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.634341  med=0.600950  mean=0.588583  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 8 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=8 run_seed=3121374721622791274
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.6750 (target=0.5100), iters=22
+Base synopsis generator iterations (final accepted attempt): 22
+[check] median-of-answers: max_err=0.671502 med=0.631246 mean=0.625919 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.671502  med=0.631246  mean=0.625919  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 22
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 9 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=9 run_seed=5609241535419811734
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.8250 (target=0.5100), iters=22
+Base synopsis generator iterations (final accepted attempt): 22
+[check] median-of-answers: max_err=0.671329 med=0.633359 mean=0.613760 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.671329  med=0.633359  mean=0.613760  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 22
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 10 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=10 run_seed=1923886611247769630
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.7000 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.662206 med=0.592190 mean=0.605244 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.662206  med=0.592190  mean=0.605244  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 11 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=11 run_seed=5582317040976142818
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.8000 (target=0.5100), iters=19
+Base synopsis generator iterations (final accepted attempt): 19
+[check] median-of-answers: max_err=0.652371 med=0.599559 mean=0.600474 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.652371  med=0.599559  mean=0.600474  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 19
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 12 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=12 run_seed=5178600985671727698
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.8000 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.664705 med=0.627122 mean=0.610660 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.664705  med=0.627122  mean=0.610660  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 13 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=13 run_seed=8992083691529311063
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.6000 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.671474 med=0.651056 mean=0.612099 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.671474  med=0.651056  mean=0.612099  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 14 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=14 run_seed=6717357011376364189
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5500 (target=0.5100), iters=19
+Base synopsis generator iterations (final accepted attempt): 19
+[check] median-of-answers: max_err=0.698126 med=0.669348 mean=0.646663 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.698126  med=0.669348  mean=0.646663  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 19
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 15 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=15 run_seed=1432678767992237807
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 1: satisfaction=0.0000 (target=0.5100), iters=8
+Running base synopsis generator (attempt 2/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 2: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 3/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 3: satisfaction=0.5250 (target=0.5100), iters=22
+Base synopsis generator iterations (final accepted attempt): 22
+[check] median-of-answers: max_err=0.685481 med=0.659244 mean=0.621413 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.685481  med=0.659244  mean=0.621413  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 22
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 16 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=16 run_seed=5358745817218572887
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=1.0000 (target=0.5100), iters=22
+Base synopsis generator iterations (final accepted attempt): 22
+[check] median-of-answers: max_err=0.646965 med=0.598454 mean=0.575995 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.646965  med=0.598454  mean=0.575995  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 22
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 17 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=17 run_seed=3639355092270011616
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.8500 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.631483 med=0.577404 mean=0.578072 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.631483  med=0.577404  mean=0.578072  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 18 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=18 run_seed=659667965054622368
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5750 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.658249 med=0.613397 mean=0.609994 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.658249  med=0.613397  mean=0.609994  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 19 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=19 run_seed=3679858097698328950
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 1: satisfaction=0.0000 (target=0.5100), iters=5
+Running base synopsis generator (attempt 2/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 2: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 3/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 3: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 4/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 4: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 5/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 5: satisfaction=0.0000 (target=0.5100), iters=17
+Running base synopsis generator (attempt 6/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 6: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 7/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 7: satisfaction=0.0000 (target=0.5100), iters=18
+Running base synopsis generator (attempt 8/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 8: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 9/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 9: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 10/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 10: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 11/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 11: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 12/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 12: satisfaction=0.0000 (target=0.5100), iters=17
+Running base synopsis generator (attempt 13/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 13: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 14/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 14: satisfaction=0.0000 (target=0.5100), iters=18
+Running base synopsis generator (attempt 15/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 15: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 16/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 16: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 17/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 17: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 18/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 18: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 19/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 19: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 20/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 20: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 21/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 21: satisfaction=0.0000 (target=0.5100), iters=21
+Running base synopsis generator (attempt 22/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 22: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 23/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 23: satisfaction=0.0000 (target=0.5100), iters=20
+Running base synopsis generator (attempt 24/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 24: satisfaction=0.0000 (target=0.5100), iters=5
+Running base synopsis generator (attempt 25/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 25: satisfaction=0.0000 (target=0.5100), iters=18
+Running base synopsis generator (attempt 26/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 26: satisfaction=0.0000 (target=0.5100), iters=20
+Running base synopsis generator (attempt 27/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 27: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 28/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 28: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 29/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 29: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 30/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 30: satisfaction=0.0000 (target=0.5100), iters=7
+[RUN FAILED] Base synopsis failed: never reached satisfaction >= 0.5100 after 30 attempts at boosting round t=1. Best satisfaction=0.0000 (best_attempt=1, best_seed=3641653353).
+
+========== RUN 20 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=20 run_seed=5204194874238968598
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.6000 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.670044 med=0.619008 mean=0.617220 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.670044  med=0.619008  mean=0.617220  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 21 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=21 run_seed=6424511243618164386
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.9750 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.621087 med=0.596523 mean=0.575981 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.621087  med=0.596523  mean=0.575981  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 22 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=22 run_seed=2416905717593926031
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.8750 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.663201 med=0.614261 mean=0.603766 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.663201  med=0.614261  mean=0.603766  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 23 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=23 run_seed=2774595621719828410
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5500 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.682182 med=0.648599 mean=0.639793 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.682182  med=0.648599  mean=0.639793  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 24 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=24 run_seed=80189184358471964
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5750 (target=0.5100), iters=21
+Base synopsis generator iterations (final accepted attempt): 21
+[check] median-of-answers: max_err=0.674994 med=0.631841 mean=0.612691 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.674994  med=0.631841  mean=0.612691  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 21
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 25 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=25 run_seed=8915025343047881952
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 1: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 2/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 2: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 3/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 3: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 4/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 4: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 5/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 5: satisfaction=0.0000 (target=0.5100), iters=8
+Running base synopsis generator (attempt 6/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 6: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 7/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 7: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 8/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 8: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 9/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 9: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 10/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 10: satisfaction=0.0000 (target=0.5100), iters=8
+Running base synopsis generator (attempt 11/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 11: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 12/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 12: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 13/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 13: satisfaction=0.0000 (target=0.5100), iters=20
+Running base synopsis generator (attempt 14/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 14: satisfaction=0.0000 (target=0.5100), iters=16
+Running base synopsis generator (attempt 15/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 15: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 16/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 16: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 17/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 17: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 18/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 18: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 19/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 19: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 20/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 20: satisfaction=0.0000 (target=0.5100), iters=18
+Running base synopsis generator (attempt 21/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 21: satisfaction=0.0000 (target=0.5100), iters=18
+Running base synopsis generator (attempt 22/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 22: satisfaction=0.0000 (target=0.5100), iters=17
+Running base synopsis generator (attempt 23/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 23: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 24/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 24: satisfaction=0.0000 (target=0.5100), iters=6
+Running base synopsis generator (attempt 25/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 25: satisfaction=0.0000 (target=0.5100), iters=7
+Running base synopsis generator (attempt 26/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 26: satisfaction=0.0000 (target=0.5100), iters=17
+Running base synopsis generator (attempt 27/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 27: satisfaction=0.0000 (target=0.5100), iters=20
+Running base synopsis generator (attempt 28/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 28: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 29/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 29: satisfaction=0.0250 (target=0.5100), iters=21
+Running base synopsis generator (attempt 30/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 30: satisfaction=0.0000 (target=0.5100), iters=20
+[RUN FAILED] Base synopsis failed: never reached satisfaction >= 0.5100 after 30 attempts at boosting round t=1. Best satisfaction=0.0250 (best_attempt=29, best_seed=2508918335).
+
+========== RUN 26 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=26 run_seed=6032038527465333277
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.9000 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.642643 med=0.614141 mean=0.596455 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.642643  med=0.614141  mean=0.596455  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 27 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=27 run_seed=479738899774741306
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 1: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 2/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 2: satisfaction=0.0750 (target=0.5100), iters=22
+Running base synopsis generator (attempt 3/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 3: satisfaction=0.0500 (target=0.5100), iters=21
+Running base synopsis generator (attempt 4/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? False
+  - satisfaction_ratio < target_ratio? True
+  attempt 4: satisfaction=0.0000 (target=0.5100), iters=19
+Running base synopsis generator (attempt 5/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 5: satisfaction=0.8000 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.657857 med=0.628666 mean=0.596246 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.657857  med=0.628666  mean=0.596246  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 28 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=28 run_seed=769071571970504361
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.9000 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.652278 med=0.615505 mean=0.596939 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.652278  med=0.615505  mean=0.596939  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 29 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=29 run_seed=8059263566455233448
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5250 (target=0.5100), iters=20
+Base synopsis generator iterations (final accepted attempt): 20
+[check] median-of-answers: max_err=0.688043 med=0.648249 mean=0.633788 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.688043  med=0.648249  mean=0.633788  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 20
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
+
+========== RUN 30 / 30 ==========
+[REPRO] global_seed=1767076465 run_index=30 run_seed=7196081037347936281
+=== Testing Spiky Boosting Algorithm (λ,ρ from base; fixed μ, T from μ-theorem) ===
+n=2000 | |Q|=40 | ε_base=5.000000 δ_base=0.1 ε_sample=181.609146 δ_sample=0.1 β=0.3 η=0.01 | T=8
+OFFSET (additive constant) = 0.000000
+μ constant (C): 1.000
+Threshold scaling: thr = λ + μ
+=== Boosting Algorithm ===
+--- Iteration 1/8 ---
+Running base synopsis generator (attempt 1/30)...
+  [base params] lambda=0.721820, 0.9 lambda=0.649638, cap_step=0.288728
+[DEBUG] Loop exited because:
+  - num_iterations < max_iterations? True
+  - total_loss_update > tau? True
+  - satisfaction_ratio < target_ratio? False
+  attempt 1: satisfaction=0.5750 (target=0.5100), iters=18
+Base synopsis generator iterations (final accepted attempt): 18
+[check] median-of-answers: max_err=0.701344 med=0.659575 mean=0.641448 frac(|err|<=thr)=1.000 (thr=0.726820, λ=0.721820, μ=0.005000)
+Early stopping: all queries λ+μ-accurate under median-of-answers.
+[final] median-of-answers: max=0.701344  med=0.659575  mean=0.641448  frac(|err|<=thr)=1.000  (thr=0.726820, λ=0.721820, μ=0.005000)
+
+
+--- Base optimizer iterations by round ---
+t=1: 18
+
+=== Final Statistics ===
+Early stopped: True after 1 iteration(s)
+λ (from base)=0.721820, μ (fixed target)=0.005000, threshold used=0.726820
+Share within threshold: 1.000
