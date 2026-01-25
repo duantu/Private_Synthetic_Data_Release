@@ -27,7 +27,7 @@ from lp_norms_oo import run_lp_norms_optimization, DEFAULT_LOWER_BOUND, DEFAULT_
 
 # Draw a fresh seed for this run and print it
 # global_seed = np.random.default_rng().integers(0, 2**32 - 1)
-global_seed = 3160466671
+global_seed = 1697329805
 print(f"[Reproducibility] Seed for this run: {global_seed}")
 
 # Optional overrides for this test (set to None to use defaults from lp_norms_oo.py)
@@ -42,7 +42,7 @@ def test_large_query_set():
     print("=" * 80)
 
     # Larger set of queries - p ranges from 1.1 to 5.0
-    queries = np.round(np.linspace(1.1, 5.0, 20), 2).tolist()
+    queries = np.round(np.linspace(1.2, 5.0, 20), 2).tolist()
     weights = [1.0 / len(queries)] * len(queries)
 
     print(f"Number of queries: {len(queries)}")
@@ -51,13 +51,14 @@ def test_large_query_set():
     print(f"Sum of weights: {sum(weights):.6f}")
 
     # Parameters
-    epsilon = 15.0
+    epsilon = 10.0
     delta = 1e-1
     beta = 0.05
     eta = 0.5
-    n = 80
+    n = 30
     tau = 0.01
     max_iterations = 2000
+    theta = 0.6
 
     lower = DEFAULT_LOWER_BOUND if LOWER_OVERRIDE is None else LOWER_OVERRIDE
     upper = DEFAULT_UPPER_BOUND if UPPER_OVERRIDE is None else UPPER_OVERRIDE
@@ -74,6 +75,7 @@ def test_large_query_set():
     print(f"  bounds: [{lower}, {upper}]")
     print(f"  data_precision: {precision}  (grid step = {10**(-precision)})")
     print(f"  Target satisfaction ratio: {0.5 + eta}")
+    print(f"  theta: {theta}")
 
     print("\n" + "=" * 80)
     print("RUNNING OPTIMIZATION")
@@ -96,6 +98,7 @@ def test_large_query_set():
         max_iterations=max_iterations,
         verbose=True,
         seed=global_seed,   # <- use the drawn seed for reproducibility
+        theta=theta,
     )
 
     runtime = time.time() - start_time
@@ -115,18 +118,22 @@ def test_large_query_set():
     print(f"Final loss: {results['final_loss']:.6f}")
     print(f"Final loss update: {results['final_loss_update']:.6f}")
     print(f"Lambda value: {results['lambda_val']:.6f}")
-    print(f"Lambda/2: {results['lambda_val'] / 2:.6f}")
+    threshold = (1 - theta) * results["lambda_val"]
+    print(f"(1-theta)*Lambda: {threshold:.6f}")
+
 
     error_stats = results["error_stats"]
     print(f"\nError Statistics:")
     print(f"  Mean error: {error_stats['mean_error']:.6f}")
     print(f"  Max error: {error_stats['max_error']:.6f}")
-    print(f"  Queries above lambda/2: {error_stats['queries_above_lambda_half']}")
-    print(f"  Percentage above lambda/2: {error_stats['queries_above_lambda_half'] / len(queries) * 100:.1f}%")
+    print(f"  Queries above (1-theta)*lambda: {error_stats['queries_above_one_minus_theta_lambda']}")
+    print(f"  Percentage above (1-theta)*lambda: "
+            f"{error_stats['queries_above_one_minus_theta_lambda'] / len(queries) * 100:.1f}%")
+
 
     print(f"\nIndividual Query Errors:")
     for i, (p, error) in enumerate(zip(queries, results["errors"])):
-        status = "✓" if error < results["lambda_val"] / 2 else "✗"
+        status = "✓" if error < threshold else "✗"
         print(f"  Query {i + 1:2d} (p={p:4.2f}): {error:.6f} {status}")
 
     # ----------------------------------------------------------------------
@@ -165,32 +172,36 @@ def test_large_query_set():
     plt.scatter(
         x_axis,
         fake_X_original,
-        s=np.full(num_points, 160),
+        s=np.full(num_points, 240),
         label=r"Initial guess $X_0$",
         color="deepskyblue",
+        marker='o',
+        facecolors='none',
+        edgecolors='blue',
+        linewidths=4.0,
     )
         # Final fake_X
     plt.scatter(
         x_axis,
         fake_X,
-        s=np.full(num_points, 160),
+        s=np.full(num_points, 240),
         label=r"Private database $\hat{X}$",
-        color="orange",
+        marker='o',
+        color='deepskyblue',
     )
 
     # (Optional) real_X for reference
     plt.scatter(
         x_axis,
         real_X,
-        s=np.full(num_points, 80),
+        s=np.full(num_points, 240),
         label=r"Real database $X$",
-        color="darkgrey",
-        alpha=0.8,
+        color="orange",
     )
 
     # Arrows: color-coded by direction + large arrowheads
-    arrow_colors = np.where(fake_X > fake_X_original, "green", "red")
-    # arrow_colors = 'black'
+    # arrow_colors = np.where(fake_X > fake_X_original, "green", "red")
+    arrow_colors = 'black'
 
     plt.quiver(
         x_axis,                        # x positions
@@ -201,8 +212,8 @@ def test_large_query_set():
         scale_units="xy",
         scale=1,
         color=arrow_colors,
-        alpha=1,
-        width=0.003,
+        alpha=0.8,
+        width=0.004,
 
         # Larger arrowheads (Option 1)
         headwidth=5,
@@ -229,12 +240,12 @@ def test_large_query_set():
     plt.gca().add_artist(scatter_legend)
 
     # Second legend: arrows
-    plt.legend(
-        handles=arrow_legend_handles,
-        fontsize=20,
-        loc="lower left",
-        title_fontsize=20,
-    )
+    # plt.legend(
+    #     handles=arrow_legend_handles,
+    #     fontsize=20,
+    #     loc="lower left",
+    #     title_fontsize=20,
+    # )
 
     plt.xlabel("Database Coordinates", fontsize=30)
     plt.ylabel("Data Value", fontsize=30)
@@ -265,6 +276,8 @@ def test_large_query_set():
     noisy_sorted = noisy_output[sort_idx]
     private_sorted = private_output[sort_idx]
 
+
+
     plt.figure(figsize=(10, 8))
 
     # -------------------------------------------
@@ -273,17 +286,17 @@ def test_large_query_set():
     noise_bar_color = "deeppink"
 
     real_proxy = plt.Line2D([0], [0], marker="o", color="deepskyblue",
-                            linestyle="-", markersize=10, label="Real query output")
+                            linestyle="-", markersize=10, label=r"Noiseless output on real data $q(X)$")
 
     private_proxy = plt.Line2D([0], [0], marker="^", color="orange",
-                               linestyle="-", markersize=10, label="Private query output")
+                               linestyle="-", markersize=10, label=r"Noiseless output on synthetic data $q(\hat{X})$")
 
     noisy_proxy = plt.Line2D([0], [0], marker="o", color=noise_bar_color,
                              linestyle="None", markersize=10,
-                             label="Real query output with noise")
+                             label=r"Noisy output on real data $\tilde{q}(X) = q(X)+\xi$")
     noise_bar_proxy = mpatches.Patch(facecolor=noise_bar_color,
                             alpha=0.25,
-                            label="Amount of added Laplace noise")
+                            label=r"Added Laplace noise $\xi$")
 
     # -------------------------------------------
     # Plot real and synthetic outputs
@@ -292,17 +305,17 @@ def test_large_query_set():
         p_sorted,
         real_sorted,
         "-o",
-        linewidth=5,
-        markersize=12,
+        linewidth=4,
+        markersize=16,
         color="deepskyblue",
     )
 
     plt.plot(
         p_sorted,
         private_sorted,
-        "-^",
-        linewidth=3.0,
-        markersize=10,
+        "-s",
+        linewidth=4,
+        markersize=16,
         color="orange",
     )
 
@@ -337,8 +350,8 @@ def test_large_query_set():
         # noisy point itself
         plt.scatter(
             x, y_noisy,
-            s=60,
-            alpha=0.9,
+            s=200,
+            alpha=1,
             color=noise_bar_color,
         )
 

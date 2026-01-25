@@ -37,7 +37,8 @@ class LPNormsCoordinateDescent:
                  data_precision: int = DEFAULT_DATA_PRECISION,
                  ub_on_p: int = 20,
                  seed: Optional[int] = None,
-                 rng: Optional[np.random.Generator] = None):
+                 rng: Optional[np.random.Generator] = None,
+                 theta: float = 1.0):
         """
         Initialize the coordinate descent algorithm with DP parameters.
 
@@ -62,6 +63,7 @@ class LPNormsCoordinateDescent:
         self.n = n
         self.tau = tau
         self.num_points = 2 * n
+        self.theta = theta
 
         self.upper_bound = upper_bound
         self.lower_bound = lower_bound
@@ -112,11 +114,16 @@ class LPNormsCoordinateDescent:
         self.query_weights = np.array(weights, dtype=float)
         self.k = len(queries)
 
-        # lambda = ln(k/beta) * 2 * rho * sqrt(2k * ln(1/delta)) / epsilon
-        self.lambda_val = (math.log(self.k / self.beta) * 2 * self.rho *
-                           math.sqrt(2 * self.k * math.log(1 / self.delta))) / self.epsilon
+        # lambda = ln(k/beta) * rho * sqrt(2k * ln(1/delta)) / (epsilon * theta)
+        # theta is a tuning parameter that allocates error budget between Laplace noise
+        # and optimization error. 
+        self.lambda_val = (
+            math.log(self.k / self.beta) * self.rho *
+            math.sqrt(2 * self.k * math.log(1 / self.delta))
+        ) / (self.epsilon * self.theta)
 
-        print(f"Calculated lambda: {self.lambda_val:.6f}")
+        print(f"Calculated lambda (theta={self.theta}): {self.lambda_val:.6f}")
+
 
     def generate_data(self, real_data: Optional[np.ndarray] = None,
                       initial_fake_data: Optional[np.ndarray] = None):
@@ -200,7 +207,7 @@ class LPNormsCoordinateDescent:
         if self.query_weights is None:
             raise ValueError("Must set queries and weights first")
 
-        satisfied_mask = self.error < self.lambda_val / 2
+        satisfied_mask = self.error < (1 - self.theta) * self.lambda_val
         weighted_satisfied = np.sum(self.query_weights[satisfied_mask])
         return float(weighted_satisfied)
 
@@ -385,10 +392,12 @@ class LPNormsCoordinateDescent:
             print(f"Initial weighted satisfaction ratio: {initial_weighted_satisfaction:.4f}")
             print(f"Target weighted satisfaction ratio: {target_ratio:.4f}")
             print(f"Lambda: {self.lambda_val:.6f}")
-            print(f"Lambda/2: {self.lambda_val / 2:.6f}")
+            print(f"(1-theta)*Lambda: {(1 - self.theta) * self.lambda_val:.6f}")
             print(f"Tau: {self.tau}")
             print(f"Number of queries: {self.k}")
-            print(f"Number of queries above lambda/2 error: {np.sum(self.error > self.lambda_val / 2)}")
+            print(f"Number of queries above (1-theta)*lambda error: "
+                f"{np.sum(self.error > (1 - self.theta) * self.lambda_val)}")
+
             print("NOTE: For CONVEX LP norms - algorithm stops when BOTH conditions are met:")
             print("  1. Satisfaction ratio >= 0.5 + eta")
             print("  2. Total loss update < tau")
@@ -402,17 +411,19 @@ class LPNormsCoordinateDescent:
 
             if verbose and num_iterations % 10 == 0:
                 current_satisfaction = self.compute_weighted_satisfaction_ratio()
-                queries_above_threshold = np.sum(self.error > self.lambda_val / 2)
+                queries_above_threshold = np.sum(self.error > (1 - self.theta) * self.lambda_val)
                 print(f"Iteration {num_iterations}: "
-                      f"Loss update = {total_loss_update:.6f}, "
-                      f"Weighted satisfaction = {current_satisfaction:.4f}, "
-                      f"Queries above lambda/2 = {queries_above_threshold}")
+                    f"Loss update = {total_loss_update:.6f}, "
+                    f"Weighted satisfaction = {current_satisfaction:.4f}, "
+                    f"Queries above (1-theta)*lambda = {queries_above_threshold}")
+
 
         final_weighted_satisfaction = self.compute_weighted_satisfaction_ratio()
         final_error_stats = {
             'mean_error': float(np.mean(self.error)),
             'max_error': float(np.max(self.error)),
-            'queries_above_lambda_half': int(np.sum(self.error > self.lambda_val / 2)),
+            'queries_above_one_minus_theta_lambda': int(np.sum(self.error > (1 - self.theta) * self.lambda_val)),
+
         }
 
         results = {
@@ -458,7 +469,9 @@ class LPNormsCoordinateDescent:
             print(f"  Both conditions met: {results['both_conditions_met']}")
             print(f"  Final weighted satisfaction: {final_weighted_satisfaction:.4f}")
             print(f"  Final loss update: {total_loss_update:.6f}")
-            print(f"  Queries above lambda/2: {final_error_stats['queries_above_lambda_half']}")
+            print(f"  Queries above (1-theta)*lambda: "
+                    f"{final_error_stats['queries_above_one_minus_theta_lambda']}")
+
 
         return results
 
@@ -477,7 +490,8 @@ def run_lp_norms_optimization(queries: List[float],
                               max_iterations: int = 1000,
                               verbose: bool = True,
                               seed: Optional[int] = None,
-                              rng: Optional[np.random.Generator] = None) -> dict:
+                              rng: Optional[np.random.Generator] = None,
+                              theta: float = 1.0) -> dict:
     """
     Convenience function to run the LP norms coordinate descent optimization.
 
@@ -500,6 +514,7 @@ def run_lp_norms_optimization(queries: List[float],
         data_precision=data_precision,
         seed=seed,
         rng=rng,
+        theta=theta,
     )
 
     optimizer.set_queries_and_weights(queries, weights)
