@@ -81,7 +81,7 @@ class LPNormsCoordinateDescent:
         self.m = self.num_points * math.ceil(
             math.log2(((upper_bound - lower_bound) / self.grid_step) + 1)
         )
-        self.rho = (upper_bound - lower_bound) / self.num_points
+        self.rho = upper_bound / self.num_points
 
         # Initialize data structures
         self.real_X = None

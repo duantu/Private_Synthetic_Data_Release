@@ -43,7 +43,8 @@ class SpikyNonconvexCoordinateDescent:
                  # expansion for bigger accepted steps
                  gamma_up: float = 1.6,           # step-size expansion factor
                  max_expand: int = 4,
-                 offset: float = 0.0):            # max expansions if loss keeps dropping
+                 offset: float = 0.0,
+                 theta: float = 1.0):            # max expansions if loss keeps dropping
         # Core params
         self.epsilon = epsilon
         self.delta_base = delta
@@ -56,6 +57,7 @@ class SpikyNonconvexCoordinateDescent:
         self.frequency = frequency
         self.data_precision = data_precision
         self.offset = float(offset) 
+        self.theta = float(theta)
 
         # RNG
         self.rng = np.random.default_rng(seed)
@@ -141,9 +143,11 @@ class SpikyNonconvexCoordinateDescent:
         self.sampled_queries = np.array([2.0] * k)
 
 
-        # lambda = ln(k/beta) * 100 * rho * sqrt(2k * ln(1/delta)) / epsilon
-        self.lambda_val = (math.log(self.k / self.beta) * 10 * self.rho *
-                           math.sqrt(2 * self.k * math.log(1 / self.delta_base))) / self.epsilon
+        # lambda = ln(k/beta) * rho * sqrt(2k * ln(1/delta)) / (epsilon * theta)
+        self.lambda_val = (math.log(self.k / self.beta)* self.rho
+                            * math.sqrt(2 * self.k * math.log(1 / self.delta_base))
+                        ) / (self.epsilon * self.theta)
+
 
         # If cap not specified, set it relative to lambda (bigger moves)
         if self.cap_step is None:
@@ -153,20 +157,36 @@ class SpikyNonconvexCoordinateDescent:
         # print(f"Set {k} spiky nonconvex queries with different amplitude vectors and frequencies")
 
     def generate_data(self,
-                      real_data: Optional[np.ndarray] = None,
-                      initial_fake_data: Optional[np.ndarray] = None):
+                    real_data: Optional[np.ndarray] = None,
+                    initial_fake_data: Optional[np.ndarray] = None):
         if real_data is not None:
+            # Use the provided real data as-is
             self.real_X = real_data.copy()
         else:
-            self.real_X = self.rng.normal(loc=0, scale=1, size=self.num_points)
+            # Draw real_X ~ N(0,1) *conditioned* on [lower_bound, upper_bound]
+            self.real_X = np.empty(self.num_points, dtype=float)
+            filled = 0
+            while filled < self.num_points:
+                # draw in batches
+                batch = self.rng.normal(loc=0.0, scale=1.0,
+                                        size=self.num_points - filled)
+                mask = (batch >= self.lower_bound) & (batch <= self.upper_bound)
+                if not np.any(mask):
+                    continue
+                good = batch[mask]
+                n_good = good.shape[0]
+                self.real_X[filled : filled + n_good] = good
+                filled += n_good
 
         if initial_fake_data is not None:
             self.fake_X = initial_fake_data.copy()
         else:
-            self.fake_X = self.rng.uniform(self.lower_bound, self.upper_bound, size=self.num_points)
-            # self.rng.normal(loc=0.0, scale=1.0, size=self.num_points)
+            self.fake_X = self.rng.uniform(self.lower_bound,
+                                        self.upper_bound,
+                                        size=self.num_points)
 
         self.fake_X_original = self.fake_X.copy()
+
 
     # -------------------------------
     # Core computations
@@ -174,9 +194,11 @@ class SpikyNonconvexCoordinateDescent:
     def _satisfaction_threshold(self) -> float:
         """
         Error threshold for declaring a query 'satisfied'.
-        Currently set to (99/100) * lambda.
+        Uses (1 - theta) * lambda, so theta controls how much of
+        the lambda budget goes to Laplace noise vs optimization error.
         """
-        return 0.9 * self.lambda_val
+        return (1.0 - self.theta) * self.lambda_val
+
 
     def compute_query_outputs(self):
         if self.amplitudes_matrix is None or self.frequencies_vector is None:
@@ -470,15 +492,28 @@ class SpikyNonconvexCoordinateDescent:
 
         if verbose:
             print(f"Initial weighted satisfaction ratio: {initial_weighted_satisfaction:.4f}")
-            print(f"Target weighted satisfaction ratio: {target_ratio:.4f}")
+            print(f"Target weighted satisfaction ratio (0.5 + eta): {target_ratio:.4f}")
             print(f"Lambda: {self.lambda_val:.6f}")
+            print(f"Theta: {self.theta:.4f}")
+
             thr = self._satisfaction_threshold()
-            print(f"0.9 Lambda: {thr:.6f}")
-            print(f"Queries above 0.9 lambda: {np.sum(self.error > thr)}")
+            print(f"Satisfaction threshold: (1 - theta) * lambda = {thr:.6f}")
+
+            # Unweighted counts, purely for diagnostics
+            num_above_thr = np.sum(self.error > thr)
+            num_below_or_equal_thr = np.sum(self.error <= thr)
+            print(f"Queries with error <= (1 - theta)*lambda: {num_below_or_equal_thr} / {self.k}")
+            print(f"Queries with error >  (1 - theta)*lambda: {num_above_thr} / {self.k}")
+
             print(f"Tau (reporting only): {self.tau}")
             print(f"Number of queries: {self.k}")
-            print(f"Queries above 99/100  lambda: {np.sum(self.error > (99/100)*self.lambda_val)}")
-            print("NOTE: Stopping when satisfaction ratio >= 0.5 + eta (nonconvex setting).")
+
+            # Optional: keep this as an extra diagnostic if you like
+            thr_99 = 0.99 * self.lambda_val
+            print(f"Queries above 0.99 * lambda (debug only): {np.sum(self.error > thr_99)}")
+
+            print("NOTE: Overall stopping (nonconvex+boosting) is based on weighted satisfaction ratio >= 0.5 + eta.")
+
 
         # while (num_iterations < max_iterations and
         #        self.compute_weighted_satisfaction_ratio() < target_ratio):
@@ -497,7 +532,7 @@ class SpikyNonconvexCoordinateDescent:
                     f"Iteration {num_iterations}: "
                     f"Loss update = {total_loss_update:.6f}, "
                     f"Weighted satisfaction = {current_satisfaction:.4f}, "
-                    f"Queries above 0.9 lambda = {queries_above_threshold}"
+                    f"Queries with error > (1-theta)*lambda = {queries_above_threshold}"
                 )
         print("[DEBUG] Loop exited because:")
         print(f"  - num_iterations < max_iterations? "
@@ -510,10 +545,11 @@ class SpikyNonconvexCoordinateDescent:
         final_weighted_satisfaction = self.compute_weighted_satisfaction_ratio()
         threshold = self._satisfaction_threshold()
         final_error_stats = {
-            'mean_error': float(np.mean(self.error)),
-            'max_error': float(np.max(self.error)),
-            'queries_above_0p9_lambda': int(np.sum(self.error > threshold)),
+            "mean_error": float(np.mean(self.error)),
+            "max_error": float(np.max(self.error)),
+            "queries_above_threshold": int(np.sum(self.error > threshold)),
         }
+
 
 
 
@@ -531,12 +567,17 @@ class SpikyNonconvexCoordinateDescent:
             'lambda_val': float(self.lambda_val),
             'tau': float(self.tau),
             'error_stats': final_error_stats,
+
+            'fake_X_original': self.fake_X_original.copy(), 
             'fake_X': self.fake_X.copy(),
             'real_X': self.real_X.copy(),
             'queries': self.sampled_queries.copy(),
             'weights': self.query_weights.copy(),
             'errors': self.error.copy(),
-            'lap_noise': self.lap_noise.copy()
+            'lap_noise': self.lap_noise.copy(),
+            'real_output': self.real_output.copy(),
+            'real_data_noisy_output': self.real_data_noisy_output.copy(),
+            'fake_output': self.fake_output.copy(),
         }
 
         if verbose:
@@ -547,7 +588,11 @@ class SpikyNonconvexCoordinateDescent:
             print(f"  Both conditions met: {results['both_conditions_met']}")
             print(f"  Final weighted satisfaction: {final_weighted_satisfaction:.4f}")
             print(f"  Final loss update: {total_loss_update:.6f}")
-            print(f"  Queries above 0.9 lambda: {final_error_stats['queries_above_0.9_lambda']}")
+            print(
+                f"  Queries with error > (1-theta)*lambda: "
+                f"{final_error_stats['queries_above_threshold']}"
+            )
+
 
 
         return results

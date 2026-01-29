@@ -178,6 +178,7 @@ def compute_epsilon_sample_from_theorem(
     if T <= 0:
         raise ValueError("T must be positive.")
     if mu <= 0:
+        
         raise ValueError("mu must be positive.")
     if not (0.0 < delta_sample < 1.0):
         raise ValueError("delta_sample must lie in (0, 1).")
@@ -228,6 +229,7 @@ class SpikyBoostingAlgorithm:
         offset: float = 0.0,
         max_base_attempts: int = 20,       # max re-tries per boosting round
         repro_seed: Optional[int] = None,
+        theta: float = 1.0, 
 
     ):
         self.k = int(k)
@@ -262,6 +264,8 @@ class SpikyBoostingAlgorithm:
         # NEW: T used in μ theorem (clamped internally to ≤ self.T)
         self.theorem_T = int(theorem_T)
 
+        self.theta = float(theta)
+
         # AdaBoost-style α using 'eta' as advantage parameter
         self.alpha = 0.5 * math.log((1.0 + 2.0 * self.eta) / (1.0 - 2.0 * self.eta))
 
@@ -270,6 +274,7 @@ class SpikyBoostingAlgorithm:
         self.all_synopses: List[Dict] = []
 
         self.repro_seed = repro_seed
+        
 
     def _derive_attempt_seed(self, t: int, attempt: int) -> Optional[int]:
         if self.repro_seed is None:
@@ -335,6 +340,8 @@ class SpikyBoostingAlgorithm:
         cumulative_accuracy = np.zeros(self.num_queries, dtype=float)
         early_stopped = False
         iterations_run = 0
+        noisy_ref = None  # will hold the fixed noisy answers used for boosting logic
+
 
         # ground truth answers (fixed, based on the real_data passed in)
         true_answers = np.zeros(self.num_queries, dtype=float)
@@ -396,6 +403,7 @@ class SpikyBoostingAlgorithm:
                     lower_bound=self.lower_bound,
                     offset=self.offset,
                     seed=attempt_seed,
+                    theta=self.theta,
                 )
                 optimizer.set_queries_and_amplitudes(
                     sampled_amplitudes,
@@ -405,7 +413,14 @@ class SpikyBoostingAlgorithm:
                 )
                 if verbose:
                     lam = float(optimizer.lambda_val)
-                    print(f"  [base params] lambda={lam:.6f}, 0.9 lambda={lam*0.9:.6f}, cap_step={float(optimizer.cap_step):.6f}")
+                    thr = optimizer._satisfaction_threshold()
+                    print(
+                        f"  [base params] lambda={lam:.6f}, "
+                        f"(1-theta)*lambda={thr:.6f}, "
+                        f"theta={optimizer.theta:.3f}, "
+                        f"cap_step={float(optimizer.cap_step):.6f}"
+                    )
+
 
                 optimizer.generate_data(real_data=real_data)
                 ret = optimizer.run_coordinate_descent(max_iterations=1000, verbose=False)
@@ -480,6 +495,10 @@ class SpikyBoostingAlgorithm:
             if base_iters is None:
                 base_iters = best_base_iters
 
+            noisy_answers = np.asarray(ret["real_data_noisy_output"], dtype=float)
+            if noisy_ref is None:
+                noisy_ref = noisy_answers.copy()
+
             if (base_iters is None) and verbose:
                 print("WARNING: base synopsis iteration count is unknown for the accepted attempt.")
 
@@ -531,8 +550,8 @@ class SpikyBoostingAlgorithm:
 
             lam = float(self.lambda_param)
             mu = float(self.mu)
-            thr_current = lam + mu
-            # thr_current = 0.5*lam
+            thr_current = (1.0 - self.theta) * lam + mu
+            
             if (self.stop_threshold_abs is not None) and (self.stop_threshold_abs < thr_current):
                 thr_current = self.stop_threshold_abs
 
@@ -542,7 +561,7 @@ class SpikyBoostingAlgorithm:
                 synopsis_answers[q] = self.compute_query_answer(optimizer.fake_X, q)
 
             # Per-query errors and λ, λ+μ-accuracy indicators
-            errors = np.abs(synopsis_answers - true_answers)
+            errors = np.abs(synopsis_answers - noisy_answers)
             lambda_accurate = (errors <= lam)
             lambda_mu_accurate = (errors <= thr_current)
 
@@ -560,7 +579,9 @@ class SpikyBoostingAlgorithm:
                     "base_iterations": base_iters,
                     "accepted_attempt": accepted_attempt_idx,
                     "accepted_attempt_seed": accepted_attempt_seed,
-
+                    # full snapshot from the base optimizer
+                    "base_result": ret,  # contains fake_X, real_X, queries, weights, errors, lap_noise
+                    "noisy_answers": noisy_answers.copy(),
                 }
             )
 
@@ -571,7 +592,7 @@ class SpikyBoostingAlgorithm:
                     all_answers[i, :] = synopsis["answers"]
 
                 per_query_medians = np.median(all_answers, axis=0)
-                median_errors = np.abs(per_query_medians - true_answers)
+                median_errors = np.abs(per_query_medians - noisy_ref)
                 median_lambda_mu_accurate = (median_errors <= thr_current)
                 frac_good = float(np.mean(median_lambda_mu_accurate))
 
@@ -639,4 +660,26 @@ class SpikyBoostingAlgorithm:
             "final_distribution": D,
             "iterations_run": iterations_run,
             "early_stopped": early_stopped,
+
+            # NEW: ground truth & query family
+            "true_answers": true_answers.copy(),                 # shape (k,)
+            "amplitudes": self.Q["amplitudes"].copy(),           # shape (k, n)
+            "frequencies": self.Q["frequencies"].copy(),         # shape (k,)
+            "trig_flags": self.Q["trig_flags"].copy(),           # shape (k,)
+            "num_queries": int(self.num_queries),
+
+            # NEW: DP / algorithm parameters for this run
+            "lambda_param": float(self.lambda_param),
+            "mu": float(self.mu),
+            "rho": float(self.rho) if self.rho is not None else None,
+            "epsilon_base": float(self.epsilon_base),
+            "delta_base": float(self.delta_base),
+            "epsilon_sample": float(self.epsilon_sample),
+            "delta_sample": float(self.delta_sample),
+            "beta": float(self.beta),
+            "eta": float(self.eta),
+            "n": int(self.n),
+            "upper_bound": float(self.upper_bound),
+            "lower_bound": float(self.lower_bound),
+            "offset": float(self.offset),
         }

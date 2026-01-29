@@ -27,7 +27,8 @@ from lp_norms_oo import run_lp_norms_optimization, DEFAULT_LOWER_BOUND, DEFAULT_
 
 # Draw a fresh seed for this run and print it
 # global_seed = np.random.default_rng().integers(0, 2**32 - 1)
-global_seed = 1697329805
+# global_seed = 1697329805
+global_seed = 1384686389
 print(f"[Reproducibility] Seed for this run: {global_seed}")
 
 # Optional overrides for this test (set to None to use defaults from lp_norms_oo.py)

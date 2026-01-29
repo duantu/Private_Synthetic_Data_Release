@@ -21,7 +21,7 @@ from spiky_nonconvex_newton_gd import SpikyNonconvexCoordinateDescent
 CONFIG = {
     "num_runs": 5,
 
-    "n": 2000,          # keep
+    "n": 1600,          # keep
     "k": 40,            # keep
     "epsilon_base": 5,  # base mechanism privacy ε
     "delta_base": 1e-1,     # ↓ from 1e-4 → ↑ λ (via log(1/δ))
@@ -40,6 +40,7 @@ CONFIG = {
     "offset": 0.0,
     "p_hard": 0.05,   # fraction of hard queries
     "amp_mid": 0.5,  # split point between easy and hard amplitudes
+    "theta": 1,
 }
 
 def generate_queries_mixture(
@@ -108,7 +109,8 @@ def build_optimizer(
     upper_bound,
     lower_bound,
     offset,
-    seed=None,  
+    seed=None,
+    theta=1,    
 ):
     return SpikyNonconvexCoordinateDescent(
         epsilon=epsilon_base,
@@ -120,8 +122,10 @@ def build_optimizer(
         upper_bound=upper_bound,
         lower_bound=lower_bound,
         offset=offset,
-        seed=seed,  
+        seed=seed,
+        theta=theta,   
     )
+
 
 
 
@@ -129,7 +133,7 @@ def test_spiky_nonconvex_queries(
     n=120, k=36, epsilon_base=3.0, delta_base=1e-6, beta=0.1, eta=0.01,
     max_iterations=5000, seed=None,
     tau=0.01, upper_bound=math.pi, lower_bound=-math.pi,
-    freq_low=4.5, freq_high=7.5, amp_low=0.1, amp_high=1.0, offset=0.0
+    freq_low=4.5, freq_high=7.5, amp_low=0.1, amp_high=1.0, offset=0.0, theta=0.9
 ):
     # Seed selection
     if seed is None:
@@ -147,7 +151,8 @@ def test_spiky_nonconvex_queries(
         upper_bound=upper_bound,
         lower_bound=lower_bound,
         offset=offset,
-        seed = seed 
+        seed = seed,
+        theta=theta, 
     )
 
     # Use the optimizer's RNG for consistency (and to match the boosting style better)
@@ -178,7 +183,9 @@ def test_spiky_nonconvex_queries(
     target = 0.5 + eta
     lam = float(opt.lambda_val)
     noise_scale = opt.rho * math.sqrt(2 * k * math.log(1 / delta_base)) / epsilon_base
-    print(f"noise_scale={noise_scale:.6f}, 0.9*lambda={0.9*lam:.6f}")
+    thr = (1 - theta) * lam
+    print(f"noise_scale={noise_scale:.6f}, (1-theta)*lambda={thr:.6f}, theta={theta:.3f}")
+
 
     # Initial loss BEFORE any optimization
     loss_before = float(
@@ -305,4 +312,5 @@ if __name__ == "__main__":
         amp_low=cfg["amp_low"],
         amp_high=cfg["amp_high"],
         offset=cfg["offset"],
+        theta=cfg["theta"],
     )
